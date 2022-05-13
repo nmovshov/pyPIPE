@@ -124,7 +124,7 @@ def _main(spool,args):
         cout("\nRunning batch {} of {}...".format(batch+1,nbatches))
         sys.stdout.flush()
         tic = timer()
-        if batch is 0:
+        if batch == 0:
             sampler.run_mcmc(p0, batchsize, skip_initial_state_check=True)
         else:
             sampler.run_mcmc(None, batchsize, skip_initial_state_check=True)
