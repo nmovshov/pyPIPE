@@ -390,5 +390,33 @@ def _append(fname,Z):
     Z = np.vstack((Z0,Z))
     np.savetxt(fname,Z)
 
+def _hydrostatic_pressure(zvec, dvec, obs, ss, SS, flipum=False):
+    if flipum:
+        zvec = np.flipud(zvec)
+        dvec = np.flipud(dvec)
+
+    # let's get the potential
+    from tof4 import Upu
+    N = len(ss[0]) - 1
+    s0 = ss[0][N]; s2 = ss[1][N]; s4 = ss[2][N]; s6 = ss[3][N]; s8 = ss[4][N]
+    aos = 1 + s0 - (1/2)*s2 + (3/8)*s4 - (5/16)*s6 + (35/128)*s8
+    U = Upu(ss, SS, obs.m)
+    U = np.flipud(U)  # WARNING: U was bottom up b/c of ss and SS
+    U = U*obs.G*obs.M*aos/obs.a0*zvec**2
+
+    # need density in real units now
+    svec = zvec*obs.a0/aos
+    drho = np.hstack((dvec[0],np.diff(dvec)))
+    m = (4*np.pi/3)*sum(drho*svec**3)
+    rvec = dvec*obs.M/m
+
+    # integrate hydrostatic equilibrium top down
+    rho = 0.5*(rvec[:-1] + rvec[1:])
+    P = np.zeros(dvec.shape)
+    P[0] = obs.P0
+    P[1:] = P[0] + np.cumsum(-rho*np.diff(U))
+
+    return P
+
 if __name__ == "__main__":
     print("alo world")
