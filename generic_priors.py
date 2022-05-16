@@ -45,6 +45,19 @@ def max_density(dvec, obs, flipum=False):
     return -0.5*d**2
 
 def gasplanet(dvec, obs, flipum=False):
+    """Minimal prior on planetary density profile."""
     return (nonphysical_density(dvec) +
             nonincreasing_density(dvec,flipum) +
             max_density(dvec,obs,flipum))
+
+def rotation_prior(mrot,obs):
+    """A prior on rotation parameter m=w^2s0^3/GM."""
+    mu = obs.m
+    sig = obs.dm/2
+    return -(mrot - mu)**2/(2*sig**2)
+
+def rho0_prior(rho0,obs):
+    """A prior on the 1-bar density."""
+    mu = obs.rho0
+    sig = obs.drho0/2
+    return -(rho0 - mu)**2/(2*sig**2)
