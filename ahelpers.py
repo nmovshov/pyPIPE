@@ -26,7 +26,7 @@ def find_outwalkers(chain,thresh=3.0):
 
     return outwalkers
 
-def dprof_mass(svec, dvec):
+def mass_integral(svec, dvec):
     """Return approximate mass integral."""
     from scipy.integrate import trapz
     return -4*np.pi*trapz(dvec*svec**2, x=svec)
@@ -352,14 +352,11 @@ def _samplify_chain(fname,ws='all',burn=0,skip=1):
     """Cull a EnsembleSampler chain into a usable sample."""
 
     # Load the sample(s)
-    C,L = load_chain(fname)
+    C,_ = load_chain(fname)
     if (type(ws) is str) and (ws == 'all'):
         ws = tuple(range(C.shape[0]))
     C = C[ws,burn::skip,:]
-    L = L[ws,burn::skip]
-    C = C.reshape((-1,C.shape[-1]))
-    L = L.reshape((-1,1))
-    Z = np.hstack((C,L))
+    Z = C.reshape((-1,C.shape[-1]))
 
     print("Z.shape = {}".format(Z.shape))
     return Z
@@ -380,7 +377,7 @@ def samplify_chain(fname,ws='all',burn=0,skip=1):
     np.savez_compressed(sf,Z=Z)
     af = os.path.join(out_dir, os.path.basename(cf)[:-3]+'txt')
     print("saving to", af)
-    np.savetxt(af, Z, header="last column is log-likihood (including prior)")
+    np.savetxt(af, Z, header=f"walkers = {ws}; burn = {burn}; skip = {skip}")
 
 def _fixpoly(x,rho0):
     return np.hstack((x,0,rho0-np.polyval(np.hstack((x,0,0)),1)))
