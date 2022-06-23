@@ -164,13 +164,14 @@ def _PCL():
     # Return struct with command line arguments as fields.
 
     parser = argparse.ArgumentParser(
-        description="Example pyPIPE driver with emcee.",
+        description="Example pyPIPE emcee-driver: sample 2D standard normal.",
         epilog="NOTE: For MPI run with mpirun -n N python driver.py"+
             " seed steps ...",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('seed', help="Seed(s) to start sampling from. " +
-        "This is usually the name of a text file, but may just be a number.")
+        "This is usually the name of a text file. In this example it is " +
+        "a simple number.")
 
     parser.add_argument('nsteps', type=int,
         help="Number of steps to be taken by each walker.")
@@ -180,12 +181,6 @@ def _PCL():
 
     parser.add_argument('-w', '--nwalkers', type=int, default=None,
         help="Number of ensemble walkers; defaults to twice the seed dimensions.")
-
-    parser.add_argument('-j', '--Jays', type=int, nargs='*', default=[2,4],
-        help="J-coefficients to include in likelihood; 0 to ignore gravity.")
-
-    parser.add_argument('-I','--with-moi', action='store_true',
-        help="Use NMoI in likelihood evaluation.")
 
     parser.add_argument('-r', '--restart', action='store_true',
         help="Restart using emcee.Backend.")
@@ -198,21 +193,6 @@ def _PCL():
 
     parser.add_argument('-f', '--fakelike', action='store_true',
         help="Use fake (uniform) likelihood function (e.g. to test prior).")
-
-    mdlgroup = parser.add_argument_group('Additional model options')
-    #mdlgroup.add_argument()
-
-    tofgroup = parser.add_argument_group('TOF options',
-        'Options controlling ToF gravity calculation')
-
-    tofgroup.add_argument('--toflevels', type=int, default=4096,
-        help="Number of level surfaces used to discretize density profile.")
-
-    tofgroup.add_argument('--xlevels', type=int, default=256,
-        help="Skip-n-spline levels.")
-
-    tofgroup.add_argument('--toforder', type=int, default=4,
-        help="Theory of figures expansion order.")
 
     emceegroup = parser.add_argument_group('emcee options',
         'Additional options to control the emcee sampler.')
@@ -237,9 +217,6 @@ def _PCL():
 
     args = parser.parse_args()
 
-    assert np.all(np.remainder(args.Jays,2) == 0), "Js must be even."
-    assert np.all(np.array(args.Jays) >= 0), "Js must be nonnegative"
-    args.Jays = np.array(args.Jays)
     if args.restart:
         args.serialize = True
 
