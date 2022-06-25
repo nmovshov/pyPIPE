@@ -84,20 +84,23 @@ def _lnprob(x,obs,args):
         rho0 = obs.rho0
         xx = x
 
+    # Evaluate prior on sample-space parameters
+    p = (the_prior(xx, obs) +
+         generic_priors.rotation_prior(mrot, obs) +
+         generic_priors.rho0_prior(rho0, obs))
+
     # Transform from sample space to model space and create the density profile
     y = the_transform(xx)
     svec, dvec = the_mdl(args.toflevels, y, rho0)
     svec = svec*obs.s0
 
     # Evaluate prior on pre-solved planet
-    p = (the_prior(xx, obs) +
-        generic_priors.rotation_prior(mrot, obs) +
-        generic_priors.rho0_prior(rho0, obs) +
-        generic_priors.gasplanet(svec, dvec, obs))
+    if not args.fakelike:
+        P = P + generic_priors.gasplanet(svec, dvec, obs)
 
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
-    if P > generic_priors._unlikely(): # usually _unlikely is -inf
+    if (P > generic_priors._unlikely()) and (not args.fakelike):
         Js, out = tof(svec, dvec, mrot,
                       xlevels=args.xlevels,
                       calc_moi=args.with_moi)
@@ -192,11 +195,6 @@ def _main(spool,args):
             sys.exit(0)
 
     # Define the emcee ensemble sampler
-    if args.fakelike:
-        lfh = _lnfake
-    else:
-        lfh = _lnprob
-
     if args.serialize:
         backend = emcee.backends.HDFBackend(os.path.join(outdir,'state.h5'))
     else:
@@ -270,10 +268,6 @@ def _main(spool,args):
     # ABYU
     return
 
-def _lnfake(x,obs,args):
-    """Use this uniform prior to test the prior pfh."""
-    return -0.0 + pfh(x,obs,args)
-
 def _PCL():
     # Return struct with command line arguments as fields.
 
@@ -283,94 +277,95 @@ def _PCL():
             " seed steps --mpi...",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('seedfile', help="Seed(s) to start sampling from. " +
-        "For PPWDR this is a text file with one line of deg - 1 + 6 numbers.")
+    parser.add_argument('seedfile', help="Seed(s) to start sampling from")
 
     parser.add_argument('nsteps', type=int,
-        help="Number of steps to be taken by each walker.")
+        help="Number of steps to be taken by each walker")
 
     parser.add_argument('observables',
             help="Specify observables struct (see observables.py for options")
 
     parser.add_argument('-v', '--verbosity', type=int, default=1,
-        help="Control runtime message verbosity.")
+        help="Control runtime message verbosity")
 
-    parser.add_argument('-w', '--nwalkers', type=int, default=None,
-        help="Number of ensemble walkers; defaults to 2x the seed dimensions.")
-
-    parser.add_argument('-j', '--Jays', type=int, nargs='*', default=[2,4],
-        help="J-coefficients to include in likelihood; 0 to ignore gravity.")
-
-    parser.add_argument('-I','--with-moi', action='store_true',
-        help="Use NMoI in likelihood evaluation.")
-    
     parser.add_argument('-r', '--restart', action='store_true',
-        help="Restart using emcee.Backend.")
+        help="Restart using emcee.Backend")
 
     parser.add_argument('-s', '--serialize', action='store_true',
-        help="Serialize using emcee.Backend.")
+        help="Serialize using emcee.Backend")
 
     parser.add_argument('-p', '--prefix', default='',
-        help="Base name for output directory.")
+        help="Base name for output directory")
 
-    parser.add_argument('-f', '--fakelike', action='store_true',
-        help="Use fake (uniform) likelihood function (e.g. to test prior).")
+    likegroup = parser.add_argument_group('Likelihood options')
 
-    parser.add_argument('--J2-error', type=float, default=None,
-        help="obs.dJ2 will be this multiplied by obs.J2.")
+    likegroup.add_argument('-j', '--Jays', type=int, nargs='*', default=[2,4],
+        help="J-coefficients to include in likelihood; 0 to ignore gravity")
 
-    parser.add_argument('--J4-error', type=float, default=None,
-        help="obs.dJ4 will be this multiplied by obs.J4.")
+    likegroup.add_argument('--J2-error', type=float, default=None,
+        help="obs.dJ2 will be this multiplied by obs.J2")
 
-    parser.add_argument('--M-error', type=float, default=None,
-        help="obs.dM will be this multiplied by obs.M.")
+    likegroup.add_argument('--J4-error', type=float, default=None,
+        help="obs.dJ4 will be this multiplied by obs.J4")
+
+    likegroup.add_argument('--M-error', type=float, default=None,
+        help="obs.dM will be this multiplied by obs.M")
+
+    likegroup.add_argument('-I','--with-moi', action='store_true',
+        help="Use NMoI in likelihood evaluation")
+
+    likegroup.add_argument('-f', '--fakelike', action='store_true',
+        help="Use fake (uniform) likelihood function (e.g. to test prior)")
 
     mdlgroup = parser.add_argument_group('Additional model options')
 
     mdlgroup.add_argument('-d', '--degree', type=int, default=8,
-        help="Polynomial degree representation.")
+        help="PPWD polynomial degree")
 
     mdlgroup.add_argument('--fix-rho0', type=int, default=1,
-        help="Don't sample 1-bar density (use obs.rho0 instead).")
+        help="Don't sample 1-bar density (use obs.rho0 instead)")
 
     mdlgroup.add_argument('--fix-mrot', type=int, default=1,
-        help="Don't sample rotation parameter (use obs.m instead).")
+        help="Don't sample rotation parameter (use obs.m instead)")
 
     mdlgroup.add_argument('--no-spin', action='store_true',
-        help="Make spherical planet (sets obs.m to zero).")
+        help="Make spherical planet (sets obs.m to zero)")
 
     tofgroup = parser.add_argument_group('TOF options',
         'Options controlling ToF gravity calculation')
 
+    tofgroup.add_argument('--toforder', type=int, default=4, choices=[4,7],
+        help="Theory of figures expansion order")
+
     tofgroup.add_argument('--toflevels', type=int, default=4096,
-        help="Number of level surfaces used to discretize density profile.")
+        help="Number of level surfaces used to discretize density profile")
 
     tofgroup.add_argument('--xlevels', type=int, default=256,
-        help="Skip-n-spline levels.")
-
-    tofgroup.add_argument('--toforder', type=int, default=4, choices=[4,7],
-        help="Theory of figures expansion order.")
+        help="Skip-n-spline levels")
 
     emceegroup = parser.add_argument_group('emcee options',
-        'Additional options to control the emcee sampler.')
+        'Additional options to control the emcee sampler')
+
+    parser.add_argument('-w', '--nwalkers', type=int, default=None,
+        help="Number of ensemble walkers; defaults to 2x the seed dimensions")
 
     emceegroup.add_argument('--ascale', type=float, default=2.0,
-        help="Scale parameter for stretch moves.")
+        help="Scale parameter for stretch moves")
 
     emceegroup.add_argument('--swalk', type=int, default=None,
-        help="Number of helper-walkers for walk moves.")
+        help="Number of helper-walkers for walk moves")
 
     emceegroup.add_argument('--moves', choices=['stretch','walk','de'],
         default='stretch',
-        help="EXPERIMENTAL: ensemble move strategy.")
+        help="EXPERIMENTAL: ensemble move strategy")
 
     swimgroup = parser.add_mutually_exclusive_group()
 
     swimgroup.add_argument('--ncores', type=int, default=1,
-        help="Use python multiprocessing.")
+        help="Use python multiprocessing")
 
     swimgroup.add_argument('--mpi', action='store_true',
-        help="Run on multi cores (must call with mpirun -n > 1).")
+        help="Run on multi cores (must call with mpirun -n > 1)")
 
     args = parser.parse_args()
 
