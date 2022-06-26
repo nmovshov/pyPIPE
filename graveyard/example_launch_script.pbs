@@ -1,0 +1,12 @@
+#PBS -N tqqr-s2-sample2
+#PBS -l select=4:ncpus=16:model=san
+#PBS -l walltime=61:00:00
+#PBS -V
+#PBS -mabe -M8312398965@msg.fi.google.com
+#PBS -r n
+
+. /home/nmovshov/miniconda3/etc/profile.d/conda.sh
+cd $PBS_O_WORKDIR
+conda activate
+
+mpirun -n 64 python drive-ppwd.py seedfile nsteps obs --mpi >& rlog.log
