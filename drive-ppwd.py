@@ -47,10 +47,9 @@ import ahelpers as ah
 
 ### PROJECT-SPECIFIC COMPONENTS ###
 import ppwd
-the_prior = ppwd.ppwd_prior;
-the_mdl = ppwd.ppwd_profile;
-the_transform = lambda x:np.concatenate(
-    (ppwd._fixcore(x[:3]), ppwd._fixcore(x[3:6]), x[6:]))
+the_prior = ppwd.ppwd_prior
+the_mdl = ppwd.ppwd_profile
+the_transform = ppwd.ppwd_transform
 ###
 
 ### GENERIC PIPE COMPONENTS ###
@@ -85,7 +84,7 @@ def _lnprob(x,obs,args):
         xx = x
 
     # Evaluate prior on sample-space parameters
-    p = (the_prior(xx, obs) +
+    P = (the_prior(xx, obs) +
          generic_priors.rotation_prior(mrot, obs) +
          generic_priors.rho0_prior(rho0, obs))
 
@@ -96,7 +95,7 @@ def _lnprob(x,obs,args):
 
     # Evaluate prior on pre-solved planet
     if not args.fakelike:
-        P = P + generic_priors.gasplanet(svec, dvec, obs)
+        P = P + generic_priors.gasplanet(dvec, obs)
 
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
@@ -107,7 +106,8 @@ def _lnprob(x,obs,args):
         svec = svec*obs.a0/(svec[0]*out.a0)
 
         jflag = args.Jays[args.Jays > 0]
-        dsqr = losses.mass((svec,dvec))**2 + losses.euclid_Jnm(Js,obs,jflag)**2
+        dsqr = (losses.mass((svec,dvec),obs)**2 +
+                losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
     return -0.5*dsqr + P
@@ -163,7 +163,7 @@ def _main(spool,args):
         obs.a0 = obs.s0
 
     # Make a directory to store output
-    outdir = '{}deg-{}_{}'.format(args.prefix,args.degree,obs.pname)
+    outdir = '{}deg-{}-ppwd_{}'.format(args.prefix,args.degree,obs.pname)
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
     else:
@@ -218,7 +218,7 @@ def _main(spool,args):
         print("ERROR: unknown move strategy.""")
         sys.exit(0)
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndims, lfh, args=[obs,args],
+    sampler = emcee.EnsembleSampler(nwalkers, ndims, _lnprob, args=[obs,args],
             pool=pool, backend=backend, moves=moves)
     print("Using {} walkers on {} dimensions.".format(nwalkers, ndims))
     print("Using {} move strategy.".format(args.moves))

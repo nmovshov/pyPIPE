@@ -144,6 +144,11 @@ def ppwd_prior(x,obs=None):
 
     return sum(lp)
 
+def ppwd_transform(x):
+    """Transform mcmc sample vector to ppwd params."""
+    y = np.concatenate((_fixcore(x[:3]), _fixcore(x[3:6]), x[6:]))
+    return y
+
 def _add_density_jump(dprof, z, scale, sharpness=100.0):
     """Add a localized density increase to existing profile.
 
@@ -204,11 +209,6 @@ def _fixcore(x):
     x[1] = bexp(x[1])  # scale (-inf,inf)->[0,inf)
     x[2] = bexp(x[2])  # sharpness (-inf,inf)->[0,inf)
     return x
-
-def _fixmcmc(x):
-    """Transform mcmc sample vector to ppwd params."""
-    y = np.concatenate((fixcore(x[:3]), fixcore(x[3:6]), x[6:]))
-    return y
 
 def _unfixcore(x):
     """Transform core parameters from physical space to sampling space."""
