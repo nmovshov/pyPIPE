@@ -4,7 +4,7 @@
 # boundary condition at z=1, and thus has n-1 free parameters for a polynomial
 # of degree n. In addition, two arc-tan density jumps are modeled with three
 # parameters each. So, for example, a degree-8 ppwd has 13 free parameters.
-# Th
+#
 # Run this driver with:
 # python drive-ppwd.py seedfile nsteps obs
 #
