@@ -89,7 +89,7 @@ def _lnprob(x,obs,args):
          generic_priors.rho0_prior(rho0, obs))
 
     # Transform from sample space to model space and create the density profile
-    y = the_transform(xx)
+    y = the_transform(xx, obs)
     svec, dvec = the_mdl(args.toflevels, y, rho0)
     svec = svec*obs.s0
 

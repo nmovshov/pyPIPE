@@ -80,74 +80,78 @@ def polynomial_profile(N, x, zvec=None, forcemono=True):
 def ppwd_prior(x,obs=None):
     """A prior on the PPWD sampling-space parameters.
 
-    The first six parameters are sampling-space transformations of the
-    smooth-step properties: location, scale, and sharpness. We are okay with
-    uniform priors on the physical values, but we need to transform those to
-    the correct prior on the sampling-space values. The rest of x just needs to
-    be bounded.
+    We use uniform priors on the physical values and we transform those to the
+    correct prior on the sampling-space values. If
+        Y = log(X - a) - log(b - X)
+    then
+        X = (a + b*e^Y)/(1 + e^Y)
+    and
+        X ~ U(a,b)
+    becomes
+        Y ~ (b - a)*(e^y)/(1 + e^y)^2.
     """
     lp = np.zeros(x.shape)
     outof = lambda a, S: a < min(S) or a > max(S)
-    bexp = lambda y: min(np.exp(y), 1e307)
-    logit = lambda y: np.log(y) - np.log(1 - y)
+    sup = _supports(obs)
+
+    # inner z
+    a, b = sup.z1
+    lp[0] = x[0] - 2*np.log(1 + np.exp(x[0])) + np.log(b - a)
+
+    # inner drho
+    a, b = sup.dro1
+    lp[1] = x[1] - 2*np.log(1 + np.exp(x[1])) + np.log(b - a)
+
+    # inner s
+    a, b = sup.s1
+    lp[2] = x[2] - 2*np.log(1 + np.exp(x[2])) + np.log(b - a)
+
+    # outer z
+    a, b = sup.z2
+    lp[3] = x[3] - 2*np.log(1 + np.exp(x[3])) + np.log(b - a)
+
+    # outer drho
+    a, b = sup.dro2
+    lp[4] = x[4] - 2*np.log(1 + np.exp(x[4])) + np.log(b - a)
+
+    # outer s
+    a, b = sup.s2
+    lp[5] = x[5] - 2*np.log(1 + np.exp(x[5])) + np.log(b - a)
     
-    if obs is None:
-        class obs:
-            rhomax = 3e4
-
-    # inner z ~ U(lo,hi) -> y=logit(z) ~ (e^y)/(1 + e^y)^2*U(logit(lo,hi))
-    support = (logit(0.05),logit(0.5))
-    if outof(x[0], support):
-        lp[0] = -np.inf
-    else:
-        lp[0] = x[0] - 2*np.log(1 + bexp(x[0]))
-
-    # inner drho ~ U(0,rhomax) -> y=log(rhoc) ~ e^y*U(-inf,log(rhomax))
-    support = (-20,np.log(obs.rhomax))
-    if outof(x[1], support):
-        lp[1] = -np.inf
-    else:
-        lp[1] = x[1]
-
-    # inner sharpness ~ U(lo,hi) -> y=log(sharpness) ~ e^y*U(log(lo),log(hi))
-    support = np.log((20,1001))
-    if outof(x[2], support):
-        lp[2] = -np.inf
-    else:
-        lp[2] = x[2]
-
-    # outer z ~ U(lo,hi) -> y=logit(z) ~ (e^y)/(1 + e^y)^2*U(logit(lo,hi))
-    support = (logit(0.5),logit(0.85))
-    if outof(x[3], support):
-        lp[3] = -np.inf
-    else:
-        lp[3] = x[3] - 2*np.log(1 + bexp(x[3]))
-
-    # outer drho ~ U(0,rhomax) -> y=log(rhoc) ~ e^y*U(-inf,log(rhomax))
-    support = (-20,np.log(obs.rhomax))
-    if outof(x[4], support):
-        lp[4] = -np.inf
-    else:
-        lp[4] = x[4]
-
-    # outer sharpness ~ U(lo,hi) -> y=log(sharpness) ~ e^y*U(log(lo),log(hi))
-    support = np.log((20,1001))
-    if outof(x[5], support):
-        lp[5] = -np.inf
-    else:
-        lp[5] = x[5]
-    
-    # polynomial coefficients, just a guess ~ U(-1e7,1e7)
+    # polynomial coefficients
+    a, b = sup.poly
     for k in range(6,len(x)):
-        if outof(x[k], (-1e7,1e7)):
-            lp[k] = -np.inf
+        lp[k] = x[k] - 2*np.log(1 + np.exp(x[k])) + np.log(b - a)
 
     return sum(lp)
 
-def ppwd_transform(x):
+def ppwd_transform(x,obs=None):
     """Transform mcmc sample vector to ppwd params."""
-    y = np.concatenate((_fixcore(x[:3]), _fixcore(x[3:6]), x[6:]))
+    sup = _supports(obs)
+    y1 = [_expit(x[0],*sup.z1), _expit(x[1],*sup.dro1), _expit(x[2],*sup.s1)]
+    y2 = [_expit(x[3],*sup.z2), _expit(x[4],*sup.dro2), _expit(x[5],*sup.s2)]
+    y3 = _expit(x[6:],*sup.poly)
+    y = np.concatenate((y1, y2, y3))
     return y
+
+def ppwd_untransform(x,obs=None):
+    """Transform ppwd params vector to sample space."""
+    sup = _supports(obs)
+    y1 = [_logit(x[0],*sup.z1), _logit(x[1],*sup.dro1), _logit(x[2],*sup.s1)]
+    y2 = [_logit(x[3],*sup.z2), _logit(x[4],*sup.dro2), _logit(x[5],*sup.s2)]
+    y3 = _logit(x[6:],*sup.poly)
+    y = np.concatenate((y1, y2, y3))
+    return y
+
+class _supports():
+    z1 = 0.05, 0.5
+    z2 = 0., 0.85
+    dro1 = dro2 = 0, 3e4
+    s1 = s2 = 20,1001
+    poly = -1e7, 1e7
+    def __init__(self, obs=None):
+        if obs is not None:
+            self.dro1 = self.dro2 = 0, obs.rhomax
 
 def _add_density_jump(dprof, z, scale, sharpness=100.0):
     """Add a localized density increase to existing profile.
@@ -198,27 +202,11 @@ def _fixpoly(x,rho0,z0=1.0,rho0p=None):
         a0 = rho0 - np.polyval(np.hstack((x,a2,0,0)),z0)
         return np.hstack((x,a2,0,a0))
 
-def _fixcore(x):
-    """Transform core parameters from sampling space to physical space."""
+def _expit(x,a,b):
+    return (a + b*np.exp(x))/(1 + np.exp(x))
 
-    x = np.array(x)
-    assert x.size == 3
-    bexp = lambda y: min(np.exp(y), 1e307) # bounded exp to avoid inf/inf=nan
-    expit = lambda y: bexp(y)/(1 + bexp(y))
-    x[0] = expit(x[0]) # location, (-inf,inf)->(0,1)
-    x[1] = bexp(x[1])  # scale (-inf,inf)->[0,inf)
-    x[2] = bexp(x[2])  # sharpness (-inf,inf)->[0,inf)
-    return x
-
-def _unfixcore(x):
-    """Transform core parameters from physical space to sampling space."""
-    x = np.array(x)
-    assert x.size == 3
-    logit = lambda y: np.log(y) - np.log(1 - y)
-    x[0] = logit(x[0])
-    x[1] = np.log(x[1])
-    x[2] = np.log(x[2])
-    return x
+def _logit(x,a,b):
+    return np.log(x - a) - np.log(b - x)
 
 def _ppwdref_profile(N, x, ref, zvec=None, forcemono=False):
     """(OBSOLETED) Referenced polynomial plus two smoothed step functions.
