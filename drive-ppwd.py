@@ -375,6 +375,7 @@ def _PCL():
     if args.restart:
         args.serialize = True
     if args.no_spin:
+        args.Jays = np.array([0])
         args.fix_mrot = 1
 
     return args
