@@ -11,13 +11,12 @@ def _sig2mahal(sig,p):
     """Return Mahalanobis distance in p dims equivalent to Z-score sig."""
     return np.sqrt(chi2.ppf(norm.cdf(sig) - norm.cdf(-sig), p))
 
-def winners(C,L,prior,sig=2.5):
+def winners(C,L,df,prior,sig=2.5):
     """Find walkers with endstate likelihood above sigma-equivalent."""
 
     L = L[:,-1]
     X = C[:,-1,:]
     P = [prior(x) for x in X]
-    df = X.shape[-1]
     thresh = -0.5*_sig2mahal(sig, df)**2
     wins = np.squeeze(np.argwhere((L - P) > thresh))
     return wins
