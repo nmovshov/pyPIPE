@@ -15,6 +15,27 @@ import ppwd
 the_mdl = ppwd.ppwd_profile
 the_transform = ppwd.ppwd_transform
 
+class Planet:
+    """Holds interior structure vectors."""
+    mass   = 0 # reference mass
+    radius = 0 # reference radius (equatorial!)
+    period = 0 # reference rotation period
+    P0     = 0 # reference pressure
+    si     = 0 # vector of mean radii (top down, s0=si[0] is outer radius)
+    rhoi   = 0 # vector of densities on si grid
+    Js     = 0 # external gravity coefficients (returned by tof<n>)
+    M      = 0 # calculated mass
+    a0     = 0 # calculated equatorial radius
+    s0     = 0 # surface mean radius (another name for si[0]
+    mi     = 0 # cumulative mass below si
+    ai     = 0 # equatorial radii on level surfaces
+    rhobar = 0 # calculated mean density
+    wrot   = 0 # rotation frequency, 2pi/period
+    qrot   = 0 # rotation parameter wrot^2a0^3/GM
+    mrot   = 0 # rotation parameter, wrot^2s0^3/GM
+    aos    = 0 # calculated equatorial to mean radius ratio (from tof<n>)
+    G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
+
 def _PCL():
     # Return struct with command line arguments as fields.
     parser = argparse.ArgumentParser(
@@ -69,21 +90,23 @@ def _main(spool,args):
     try:
         try:
             sample = np.loadtxt(args.samplefile, delimiter=',')
-        except:
+        except ValueError:
             sample = np.loadtxt(args.samplefile, delimiter=' ')
         if len(sample.shape) == 1:
             sample = np.reshape(sample, (1,-1))
         print(f"Found {sample.shape[0]} records in {args.samplefile}.")
     except:
         print("Failed to load sample; check command line.")
-        raise
+        sys.exit(1)
 
     # Load planet observables
     try:
         obs = getattr(observables, args.observables)
     except:
         print("Could not find planet observables; check spelling?")
-        sys.exit(0)
+        sys.exit(1)
+
+    # Create a planet from each row
 
 if __name__ == "__main__":
     clargs = _PCL()
