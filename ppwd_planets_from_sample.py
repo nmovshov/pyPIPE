@@ -5,6 +5,7 @@ import sys, os
 import numpy as np
 import argparse
 import schwimmbad
+from timeit import default_timer as timer
 
 # pyPIPE modules
 import observables
@@ -36,6 +37,11 @@ class Planet:
     aos    = 0 # calculated equatorial to mean radius ratio (from tof<n>)
     G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
 
+def cook_planet(x, obs, opts):
+    """Create a planet object from sample-space parameters."""
+    from time import sleep
+    sleep(0.01)
+
 def _PCL():
     # Return struct with command line arguments as fields.
     parser = argparse.ArgumentParser(
@@ -48,7 +54,7 @@ def _PCL():
             help="Observables struct (usually planet name, " +
                  "see observables.py for options")
 
-    parser.add_argument('--nsamples', type=int, default=None,
+    parser.add_argument('-n', '--nsamples', type=int, default=None,
         help="Number of samples to convert (leave blank to use entire sample)")
 
     parser.add_argument('-v', '--verbosity', type=int, default=1,
@@ -107,6 +113,20 @@ def _main(spool,args):
         sys.exit(1)
 
     # Create a planet from each row
+    nsamp = args.nsamples
+    if nsamp is None:
+        nsamp = sample.shape[0]
+    print("Cooking planets...")
+    tic = timer()
+    for k in range(nsamp):
+        if (args.ncores == 1) and (args.verbosity > 0):
+            print(f"cooking planet {k+1} of {nsamp}...",end='')
+        s = sample[k]
+        p = cook_planet(s,obs,args)
+        if (args.ncores == 1) and (args.verbosity > 0):
+            print("done.")
+    toc = timer()
+    print(f"Cooking planets...done ({(toc-tic)/3600:0.2g} hours).")
 
 if __name__ == "__main__":
     clargs = _PCL()
