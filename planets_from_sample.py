@@ -2,6 +2,7 @@
 # Script to convert a sample to list of ppwd profiles.
 #------------------------------------------------------------------------------
 import sys, os
+import pickle
 import numpy as np
 import argparse
 import schwimmbad
@@ -10,37 +11,17 @@ from timeit import default_timer as timer
 # pyPIPE modules
 import observables
 import tof4, tof7
+import TOFPlanet
 import ahelpers as ah
 import ppwd
 
 the_mdl = ppwd.ppwd_profile
 the_transform = ppwd.ppwd_transform
 
-class Planet:
-    """Holds interior structure vectors."""
-    mass   = 0 # reference mass
-    radius = 0 # reference radius (equatorial!)
-    period = 0 # reference rotation period
-    P0     = 0 # reference pressure
-    si     = 0 # vector of mean radii (top down, s0=si[0] is outer radius)
-    rhoi   = 0 # vector of densities on si grid
-    Js     = 0 # external gravity coefficients (returned by tof<n>)
-    M      = 0 # calculated mass
-    a0     = 0 # calculated equatorial radius
-    s0     = 0 # surface mean radius (another name for si[0]
-    mi     = 0 # cumulative mass below si
-    ai     = 0 # equatorial radii on level surfaces
-    rhobar = 0 # calculated mean density
-    wrot   = 0 # rotation frequency, 2pi/period
-    qrot   = 0 # rotation parameter wrot^2a0^3/GM
-    mrot   = 0 # rotation parameter, wrot^2s0^3/GM
-    aos    = 0 # calculated equatorial to mean radius ratio (from tof<n>)
-    G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
-
 def cook_planet(x, obs, opts):
     """Create a planet object from sample-space parameters."""
-    from time import sleep
-    sleep(0.01)
+    p = TOFPlanet.TOFPlanet()
+    return p
 
 def _PCL():
     # Return struct with command line arguments as fields.
@@ -89,6 +70,9 @@ def _PCL():
         help="Use multiple cores on single node")
 
     args = parser.parse_args()
+    if args.ncores > 1:
+        print("WARNING: multi-core support coming soon.")
+        args.ncores = 1
     return args
 
 def _main(spool,args):
@@ -117,16 +101,24 @@ def _main(spool,args):
     if nsamp is None:
         nsamp = sample.shape[0]
     print("Cooking planets...")
+    planets = []
     tic = timer()
     for k in range(nsamp):
         if (args.ncores == 1) and (args.verbosity > 0):
             print(f"cooking planet {k+1} of {nsamp}...",end='')
         s = sample[k]
         p = cook_planet(s,obs,args)
+        planets.append(p)
         if (args.ncores == 1) and (args.verbosity > 0):
             print("done.")
     toc = timer()
     print(f"Cooking planets...done ({(toc-tic)/3600:0.2g} hours).")
+
+    # pickle planets
+    outname = f"{args.samplefile[:-4]}_planets.pickle"
+    with open(outname,'wb') as f:
+        pickle.dump(planets,f)
+    print(f"pickled {len(planets)} planets in {outname}.")
 
 if __name__ == "__main__":
     clargs = _PCL()
