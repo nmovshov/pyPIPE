@@ -27,31 +27,8 @@ class TOFPlanet:
 
     """
     def __init__(self, obs=None):
-        self.mass   = 0.0 # reference mass
-        self.radius = 0.0 # reference radius (equatorial!)
-        self.period = 0.0 # reference rotation period
-        self.P0     = 0.0 # reference pressure
-        self.si     = 0.0 # vector of mean radii (top down, s0=si[0] is outer radius)
-        self.rhoi   = 0.0 # vector of densities on si grid
-        self.Js     = 0.0 # external gravity coefficients (returned by tof<n>)
-        self.M      = 0.0 # calculated mass
-        self.a0     = 0.0 # calculated equatorial radius
-        self.s0     = 0.0 # surface mean radius (another name for si[0]
-        self.mi     = 0.0 # cumulative mass below si
-        self.ai     = 0.0 # equatorial radii on level surfaces
-        self.rhobar = 0.0 # calculated mean density
-        self.wrot   = 0.0 # rotation frequency, 2pi/period
-        self.qrot   = 0.0 # rotation parameter wrot^2a0^3/GM
-        self.mrot   = 0.0 # rotation parameter, wrot^2s0^3/GM
-        self.ss     = 0.0 # shape functions (returned by tof<n>)
-        self.SS     = 0.0 # shape functions (returned by tof<n>)
-        self.A0     = 0.0 # dimensionless potential (returned by tof<n>)
-        self.Js     = 0.0 # external gravity coefficients (returned by tof<n>)
-        self.GM     = 0.0 # mass parameter
         self.G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
-
         self.opts = _default_opts() # holds user configurable options
-
         if obs is not None:
             self.set_observables(obs)
 
@@ -66,8 +43,9 @@ class TOFPlanet:
         self.wrot = 2*np.pi/self.period
         self.qrot = self.wrot**2*self.radius**3/self.GM
         self.mrot = self.wrot**2*self.s0**3/self.GM
+        self.rhobar = self.mass/(4*np.pi/3*self.s0**3)
 
-    def relax_to_HE(self):
+    def relax_to_HE(self, fixradius=True, fixmass=False):
         """ Call tof<n> to obtain equilibrium shape and gravity."""
 
         if (self.opts['verbosity'] > 1):
@@ -85,21 +63,29 @@ class TOFPlanet:
             xlevels=self.opts['xlevels'])
         toc = timer() - tic
 
-        self.aos = out.a0
-        # self.ss = structfun(@flipud, out.ss, 'UniformOutput', false);
-        # self.SS = structfun(@flipud, out.SS, 'UniformOutput', false);
-        # self.A0 = flipud(out.A0)
-
         if (self.opts['verbosity'] > 1):
             print('  Relaxing to hydrostatic equilibrium...done.')
             print(f' Elapsed time {toc:g} sec.')
+
+        if fixradius:
+            self.aos = out.a0
+            self.si = self.si*self.radius/(self.si[0]*self.aos)
+            self.s0 = self.si[0]
+            self.a0 = self.s0*self.aos
+            self.M = _mass_int(self.si, self.rhoi)
+        if fixmass:
+            self.rhoi = self.rhoi*self.mass/self.M
+            self.M = _mass_int(self.si, self.rhoi)
+
+def _mass_int(svec, dvec):
+    """Trapz-integrate mass from rho(r) data."""
+    from scipy.integrate import trapz
+    return -4*np.pi*trapz(dvec*svec**2, x=svec)
 
 def _default_opts():
     """Return options dict used by TOFPlanet class methods."""
     opts = {'toforder':4,
             'dJtol':1e-6,
-            'drhotol':1e-6,
-            'MaxIterBar':60,
             'MaxIterHE':60,
             'xlevels':-1,
             'verbosity':1
