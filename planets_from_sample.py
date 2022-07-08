@@ -13,14 +13,21 @@ import observables
 import tof4, tof7
 import TOFPlanet
 import ahelpers as ah
-import ppwd
 
+import ppwd
 the_mdl = ppwd.ppwd_profile
 the_transform = ppwd.ppwd_transform
 
 def cook_planet(x, obs, opts):
     """Create a planet object from sample-space parameters."""
-    p = TOFPlanet.TOFPlanet()
+    y = the_transform(x, obs)
+    svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
+    p = TOFPlanet.TOFPlanet(obs)
+    p.si = svec*obs.s0
+    p.rhoi = dvec
+    p.opts['toforder'] = opts.toforder
+    p.opts['xlevels'] = opts.xlevels
+    p.relax_to_HE()
     return p
 
 def _PCL():
