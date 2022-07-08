@@ -1,6 +1,10 @@
 #------------------------------------------------------------------------------
 # Interior model of rotating fluid planet.
 #------------------------------------------------------------------------------
+import numpy as np
+import tof4
+import tof7
+from timeit import default_timer as timer
 
 class TOFPlanet:
     """Interior model of rotating fluid planet.
@@ -22,7 +26,6 @@ class TOFPlanet:
     possible to define mass, radius, and density simultaneously.
 
     """
-
     def __init__(self, obs=None):
         self.mass   = 0.0 # reference mass
         self.radius = 0.0 # reference radius (equatorial!)
@@ -40,8 +43,14 @@ class TOFPlanet:
         self.wrot   = 0.0 # rotation frequency, 2pi/period
         self.qrot   = 0.0 # rotation parameter wrot^2a0^3/GM
         self.mrot   = 0.0 # rotation parameter, wrot^2s0^3/GM
-        self.aos    = 1.0 # calculated equatorial to mean radius ratio (from tof<n>)
+        self.ss     = 0.0 # shape functions (returned by tof<n>)
+        self.SS     = 0.0 # shape functions (returned by tof<n>)
+        self.A0     = 0.0 # dimensionless potential (returned by tof<n>)
+        self.Js     = 0.0 # external gravity coefficients (returned by tof<n>)
+        self.GM     = 0.0 # mass parameter
         self.G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
+
+        self.opts = _default_opts() # holds user configurable options
 
         if obs is not None:
             self.set_observables(obs)
@@ -50,5 +59,49 @@ class TOFPlanet:
         """ Copy physical properties from an observables struct."""
         self.mass = obs.M
         self.radius = obs.a0
-        self.period = obs.P
+        self.s0 = obs.s0
         self.P0 = obs.P0
+        self.period = obs.P
+        self.GM = self.G*self.mass
+        self.wrot = 2*np.pi/self.period
+        self.qrot = self.wrot**2*self.radius**3/self.GM
+        self.mrot = self.wrot**2*self.s0**3/self.GM
+
+    def relax_to_HE(self):
+        """ Call tof<n> to obtain equilibrium shape and gravity."""
+
+        if (self.opts['verbosity'] > 1):
+            print('  Relaxing to hydrostatic equilibrium...')
+        tic = timer()
+        if self.opts['toforder'] == 4:
+            tofun = tof4.tof4
+        elif self.opts['toforder'] == 7:
+            tofun = tof7.tof7
+        else:
+            raise ValueError('Unimplemented tof order')
+
+        self.Js, out = tofun(self.si, self.rhoi, self.mrot,
+            tol=self.opts['dJtol'], maxiter=self.opts['MaxIterHE'],
+            xlevels=self.opts['xlevels'])
+        toc = timer() - tic
+
+        self.aos = out.a0
+        # self.ss = structfun(@flipud, out.ss, 'UniformOutput', false);
+        # self.SS = structfun(@flipud, out.SS, 'UniformOutput', false);
+        # self.A0 = flipud(out.A0)
+
+        if (self.opts['verbosity'] > 1):
+            print('  Relaxing to hydrostatic equilibrium...done.')
+            print(f' Elapsed time {toc:g} sec.')
+
+def _default_opts():
+    """Return options dict used by TOFPlanet class methods."""
+    opts = {'toforder':4,
+            'dJtol':1e-6,
+            'drhotol':1e-6,
+            'MaxIterBar':60,
+            'MaxIterHE':60,
+            'xlevels':-1,
+            'verbosity':1
+            }
+    return opts
