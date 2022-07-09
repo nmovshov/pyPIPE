@@ -45,7 +45,7 @@ class TOFPlanet:
         self.mrot = self.wrot**2*self.s0**3/self.GM
         self.rhobar = self.mass/(4*np.pi/3*self.s0**3)
 
-    def relax_to_HE(self, fixradius=True, fixmass=False):
+    def relax_to_HE(self, fixradius=True, fixmass=False, moi=False):
         """ Call tof<n> to obtain equilibrium shape and gravity."""
 
         if (self.opts['verbosity'] > 1):
@@ -60,7 +60,7 @@ class TOFPlanet:
 
         self.Js, out = tofun(self.si, self.rhoi, self.mrot,
             tol=self.opts['dJtol'], maxiter=self.opts['MaxIterHE'],
-            xlevels=self.opts['xlevels'])
+            xlevels=self.opts['xlevels'], calc_moi=moi)
         toc = timer() - tic
 
         if (self.opts['verbosity'] > 1):
@@ -76,6 +76,8 @@ class TOFPlanet:
         if fixmass:
             self.rhoi = self.rhoi*self.mass/self.M
             self.M = _mass_int(self.si, self.rhoi)
+        if moi:
+            self.NMoI = out.NMoI
 
 def _mass_int(svec, dvec):
     """Trapz-integrate mass from rho(r) data."""
