@@ -1,5 +1,5 @@
 # pyPIPE
-python drivers for planetary interiors posteriors exploration
+Drivers and analysis helpers for planetary interiors posteriors exploration
 
 This repository holds ready-to-use drivers for MCMC sampling of interior
 density profiles, including generic priors and loss functions, observables, and
@@ -13,7 +13,7 @@ implements many generic tasks (reading a saved chain, plotting traces and
 other diagnostics, and more) and will very likely be tweaked as well.
 
 The repo contains local copies of cms and tof solvers from CMS-planet and
-TOF-planet. These are not sub modules; they are periodically synced with the
+TOF-planet. These are not submodules; they are periodically synced with the
 latest versions. When in doubt you can always get a fresh copy.
 
 There is an example slurm launch script that can be used on lux.
