@@ -181,18 +181,15 @@ methods(Static)
         %   ADD_DENSITY_JUMP(...,sharpness) allows you to control the step's
         %   "sharpness", the radial distance over which most of the density
         %   will be added. The sharpness parameter is dimensionless; experiment
-        %   with different values to see the effect. Default 100.
-        %
-        %   Algorithm: we use the inverse tangent function to approximate the
-        %   step.
+        %   with different values to see the effect. Default 200.
         arguments
             dprof (:,2) double
             z (1,1) double
             scale (1,1) double
-            sharpness (1,1) double = 100
+            sharpness (1,1) double = 200
         end
         x = dprof(:,1)/dprof(1); % make sure it's normalized
-        y = scale*(pi/2 + atan(-sharpness*(x - z)))/pi;
+        y = ppwd.sigmoidt(x,z,scale,sharpness);
         dprof(:,2) = dprof(:,2) + y;
     end
 
@@ -204,6 +201,14 @@ methods(Static)
     function y = expit(x, sup)
         a = sup(1); b = sup(2);
         y = (a + b.*exp(x))./(1 + exp(x));
+    end
+
+    function y = sigmoidt(x, z, scale, sh)
+        y = scale*(pi/2 + atan(-sh*(x - z)))/pi;
+    end
+
+    function y = sigmoide(x, z, scale, sh)
+        y = scale./(1 + exp(sh*(x - z)));
     end
 
     function y = ppwd_transform(x, obs)
