@@ -174,7 +174,7 @@ def _add_density_jump(dprof, z, scale, sharpness=100.0):
 
     zvec, dvec = dprof
     x = zvec/zvec[0] # make sure radii are normalized before applying atan
-    y = scale*(np.pi/2 + np.arctan(-sharpness*(x - z)))/np.pi
+    y = _sigmoidt(x, z, scale, sharpness)
     dvec = dvec + y
     return (zvec,dvec)
 
@@ -207,6 +207,12 @@ def _expit(x,a,b):
 
 def _logit(x,a,b):
     return np.log(x - a) - np.log(b - x)
+
+def _sigmoidt(x, z, scale, sh):
+    return scale*(np.pi/2 + np.arctan(-sh*(x - z)))/np.pi
+
+def _sigmoide(x, z, scale, sh):
+    return scale/(1 + np.exp(sh*(x - z)))
 
 def _ppwdref_profile(N, x, ref, zvec=None, forcemono=False):
     """(OBSOLETED) Referenced polynomial plus two smoothed step functions.
