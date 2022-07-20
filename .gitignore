@@ -1,6 +1,7 @@
 # ad-hoc
 *~
 *.asv
+*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -60,7 +61,6 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
