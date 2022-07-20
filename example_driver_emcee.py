@@ -89,9 +89,12 @@ def _main(spool,args):
     else:
         backend = emcee.backends.Backend()
     if args.restart:
-        C = backend.get_last_sample().coords
-        nwalkers = C.shape[0]
-        ndims = C.shape[1]
+        C = backend.get_chain()
+        nsteps_completed = C.shape[0]
+        nwalkers = C.shape[1]
+        ndims = C.shape[2]
+        args.nsteps = max(args.nsteps - nsteps_completed, 0)
+        print(f"{nsteps_completed} completed steps found in {outdir}/state.h5")
     else:
         backend.reset(nwalkers, ndims)
 
