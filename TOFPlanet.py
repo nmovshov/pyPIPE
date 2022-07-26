@@ -67,8 +67,13 @@ class TOFPlanet:
             print('  Relaxing to hydrostatic equilibrium...done.')
             print(f' Elapsed time {toc:g} sec.')
 
+        self.NMoI = out.NMoI
+        self.ss = out.ss
+        self.SS = out.SS
+        self.A0 = out.A0
+        self.aos = out.a0
+
         if fixradius:
-            self.aos = out.a0
             self.si = self.si*self.radius/(self.si[0]*self.aos)
             self.s0 = self.si[0]
             self.a0 = self.s0*self.aos
