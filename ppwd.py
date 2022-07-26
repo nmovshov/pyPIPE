@@ -143,6 +143,10 @@ def ppwd_untransform(x,obs=None):
     y = np.concatenate((y1, y2, y3))
     return y
 
+def quadratic_planet(M, R, rho0=0):
+    """Return a s.t. rho(r) = a*(r/R)^2 - a integrates to M."""
+    return 5/2*rho0 - 15*M/8/np.pi/R**3
+
 class _supports():
     z1 = 0.05, 0.5
     z2 = 0.5, 0.85

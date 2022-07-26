@@ -29,8 +29,9 @@ class TOFPlanet:
     def __init__(self, obs=None):
         self.G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
         self.opts = _default_opts() # holds user configurable options
-        if obs is not None:
-            self.set_observables(obs)
+        if obs is None:
+            obs = _default_planet()
+        self.set_observables(obs)
 
     def set_observables(self,obs):
         """ Copy physical properties from an observables struct."""
@@ -45,7 +46,8 @@ class TOFPlanet:
         self.mrot = self.wrot**2*self.s0**3/self.GM
         self.rhobar = self.mass/(4*np.pi/3*self.s0**3)
 
-    def relax_to_HE(self, fixradius=True, fixmass=False, moi=False):
+    def relax_to_HE(self, fixradius=True, fixmass=False,
+                    moi=False, pressure=False):
         """ Call tof<n> to obtain equilibrium shape and gravity."""
 
         if (self.opts['verbosity'] > 1):
@@ -81,8 +83,9 @@ class TOFPlanet:
         if fixmass:
             self.rhoi = self.rhoi*self.mass/self.M
             self.M = _mass_int(self.si, self.rhoi)
-        if moi:
-            self.NMoI = out.NMoI
+
+        if pressure:
+            self.Ui = -self.G*self.mass/self.s0**3*self.si**2*self.A0
 
 def _mass_int(svec, dvec):
     """Trapz-integrate mass from rho(r) data."""
@@ -98,3 +101,30 @@ def _default_opts():
             'verbosity':1
             }
     return opts
+
+class _default_planet:
+    """Use this to prefill critical TP fields with reasonable values."""
+    M  = 1898.187e24
+    a0 = 71492e3
+    s0 = 69911e3
+    P0 = 1e5
+    P = 0.41354*24*3600
+
+def _test():
+    obs = _default_planet()
+    tp = TOFPlanet(obs)
+    N = 4096
+    tp.si = np.linspace(1, 1/N, N)
+    a = - 15*obs.M/8/np.pi/obs.s0**3
+    tp.rhoi = a*tp.si**2 - a
+    tp.relax_to_HE(moi=True, pressure=True)
+    print("J0 = {}".format(tp.Js[0]))
+    print("J2 = {}".format(tp.Js[1]))
+    print("J4 = {}".format(tp.Js[2]))
+    print("J6 = {}".format(tp.Js[3]))
+    print("J8 = {}".format(tp.Js[4]))
+    print("I = {}".format(tp.NMoI))
+    print("")
+
+if __name__ == '__main__':
+    _test()
