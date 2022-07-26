@@ -145,7 +145,7 @@ def ppwd_untransform(x,obs=None):
 
 class _supports():
     z1 = 0.05, 0.5
-    z2 = 0., 0.85
+    z2 = 0.5, 0.85
     dro1 = dro2 = 0, 3e4
     s1 = s2 = 20,1001
     poly = -1e7, 1e7
