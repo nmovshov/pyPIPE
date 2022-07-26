@@ -70,9 +70,7 @@ class TOFPlanet:
             print(f' Elapsed time {toc:g} sec.')
 
         self.NMoI = out.NMoI
-        self.ss = out.ss
-        self.SS = out.SS
-        self.A0 = out.A0
+        self.A0 = np.flip(out.A0)
         self.aos = out.a0
 
         if fixradius:
@@ -85,7 +83,19 @@ class TOFPlanet:
             self.M = _mass_int(self.si, self.rhoi)
 
         if pressure:
-            self.Ui = -self.G*self.mass/self.s0**3*self.si**2*self.A0
+            r = self.si
+            rho = self.rhoi
+            U = -self.G*self.mass/self.s0**3*self.si**2*self.A0
+            gradU = np.zeros_like(r)
+            gradU[0] = (U[0] - U[1])/(r[0] - r[1])
+            gradU[1:-1] = (U[0:-2] - U[2:])/(r[0:-2] - r[2:])
+            gradU[-1] = (U[-2] - U[-1])/(r[-2] - r[-1])
+            intgrnd = rho*gradU
+            P = np.zeros_like(r)
+            P[0] = self.P0
+            for k in range(P.size-1): # note integrate downward
+                P[k+1] = P[k] + 0.5*(r[k] - r[k+1])*(intgrnd[k] + intgrnd[k+1])
+            self.Pi = P
 
 def _mass_int(svec, dvec):
     """Trapz-integrate mass from rho(r) data."""
@@ -124,6 +134,7 @@ def _test():
     print("J6 = {}".format(tp.Js[3]))
     print("J8 = {}".format(tp.Js[4]))
     print("I = {}".format(tp.NMoI))
+    print("P_center = {}".format(tp.Pi[-1]))
     print("")
 
 if __name__ == '__main__':
