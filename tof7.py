@@ -121,7 +121,7 @@ def tof7(zvec, dvec, mrot, xlevels=-1, tol=1e-8, maxiter=100, calc_moi=False):
     out.qrot = mrot*a0**3
     out.ss = ss
     out.SS = SS
-    #out.A0 = B4(ss,SS,mrot) #TODO: implement if/when need grav potential
+    out.A0 = B4(ss,SS,mrot)
     if calc_moi:
         out.NMoI = NMoI(zvec, dvec, ss, a0)
     else:
@@ -598,6 +598,31 @@ def B1215(s, S, m):
     new_s = np.array((A2/S0,A4/S0,A6/S0,A8/S0,A10/S0,A12/S0,A14/S0)).T
     return new_s
 
+def B4(ss, SS, m):
+    # Compute ToF7 equivalent of B.4.
+    S = np.array([z for z in SS]).T
+    s = np.array([z for z in ss]).T
+    s = s[:,1:] # s0 is not part of this system
+    N = s.shape[0]
+    mterm = (m/3)*np.ones((N,1))
+    terms = np.hstack((S,mterm))
+    fields = list(C7['A']['A0'].keys())
+    nt = len(fields)
+    assert terms.shape[1] == nt
+
+    A0 = np.zeros(N)
+    for j in range(nt):
+        block = np.array(C7['A']['A0'][fields[j]]).reshape(-1,8)
+        for row in block:
+            c = row[-1]
+            pows = row[:-1]
+            if np.any(pows):
+                A0 = A0 + c*terms[:,j]*np.prod(s**pows,axis=1)
+            else:
+                A0 = A0 + c*terms[:,j]
+
+    return A0
+
 def A24(sn):
     """Nettelmann et al 2021 eq. A.24."""
     s2 = sn[:,0]; s4 = sn[:,1]; s6 = sn[:,2];
@@ -618,7 +643,7 @@ def _test():
     from timeit import default_timer as timer
     N = 1024
     zvec = np.linspace(1, 1/N, N)*1e7
-    dvec = np.linspace(0,1,N)*4000
+    dvec = -3000*zvec**2 + 3000
     mrot = 0.08
     nx = 128
     tic = timer()
