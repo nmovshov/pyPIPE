@@ -27,7 +27,7 @@ def cook_planet(x, obs, opts):
     p.rhoi = dvec
     p.opts['toforder'] = opts.toforder
     p.opts['xlevels'] = opts.xlevels
-    p.relax_to_HE(fixradius=True, moi=opts.with_moi)
+    p.relax_to_HE(fixradius=True, moi=opts.with_moi, pressure=opts.with_pressure)
     return p
 
 def _PCL():
@@ -71,8 +71,11 @@ def _PCL():
     tofgroup.add_argument('--xlevels', type=int, default=256,
         help="Skip-n-spline levels")
 
-    tofgroup.add_argument('-m','--with-moi', action='store_true',
-        help="Include MoI calculation (off by default for speed)")
+    tofgroup.add_argument('-m','--with-moi', type=int, default=1,
+        help="Include MoI calculation")
+
+    tofgroup.add_argument('-P','--with-pressure', type=int, default=1,
+        help="Include pressure calculation")
 
     swimgroup = parser.add_argument_group('Parallel execution option')
 
