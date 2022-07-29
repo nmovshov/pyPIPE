@@ -5,7 +5,7 @@ import ppwd
 import ahelpers as ah
 
 if len(sys.argv) == 1:
-    print("Usage: python append.py filename outputname dof")
+    print("Usage: python save_ppwd_winners.py filename outputname dof")
     sys.exit(0)
 
 fname = sys.argv[1]
