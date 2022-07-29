@@ -3,6 +3,19 @@
 ###############################################################################
 import numpy as np
 
+def ppwd_planet(N, x, obs, toforder=4, xlevels=-1):
+    """Create a TOFPlanet object from sample-space parameters."""
+    import TOFPlanet
+    y = ppwd_transform(x, obs)
+    svec, dvec = ppwd_profile(N, y, obs.rho0)
+    p = TOFPlanet.TOFPlanet(obs)
+    p.si = svec*obs.s0
+    p.rhoi = dvec
+    p.opts['toforder'] = toforder
+    p.opts['xlevels'] = xlevels
+    p.relax_to_HE(fixradius=True, moi=True, pressure=True)
+    return p
+
 def ppwd_profile(N, x, rho0, zvec=None, forcemono=True):
     """Single polynomial plus two smoothed step functions.
 
