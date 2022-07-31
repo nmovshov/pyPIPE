@@ -18,6 +18,8 @@ print("C.shape = ", C.shape)
 keepers = ah.winners(C,L,df,ppwd.ppwd_prior) # 2.5 sigma with n dof
 print("keepers.shape = ", keepers.shape)
 Z = C[keepers,-1,:]
+if Z.ndim == 1:
+    Z = Z.reshape((1,-1))
 print("Z.shape = ", Z.shape)
 print(f"appending to {outname}.")
 try:
