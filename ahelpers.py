@@ -222,7 +222,7 @@ def compare_subhists(fname,subs,ws='all',dims='all',burn=0,skip=1,**kwargs):
         plt.show(block=False)
         pass
 
-def plot_histograms(fname,ws='all',dims='all',burn=0,skip=1,**kwargs):
+def plot_histograms(fname,ws='all',dims='all',burn=0,skip=1,trans=None,**kwargs):
     """Visually inspect individual histograms."""
     
     # Load the sample(s)
@@ -230,12 +230,16 @@ def plot_histograms(fname,ws='all',dims='all',burn=0,skip=1,**kwargs):
     if (type(ws) is str) and (ws == 'all'):
         ws = tuple(range(C.shape[0]))
     C = np.vstack(C[ws,burn::skip,:])
+    if trans is not None:
+        C = np.array([trans(x) for x in C])
     print('C.shape =', C.shape)
     
     # Inspect histograms
     import matplotlib.pyplot as plt
     if dims == 'all':
         dims = tuple(range(C.shape[-1]))
+    if type(dims) is int:
+        dims = [dims]
     for dim in dims:
         x = C[:,dim]
         plt.figure()
