@@ -26,12 +26,13 @@ class TOFPlanet:
     possible to define mass, radius, and density simultaneously.
 
     """
-    def __init__(self, obs=None):
+    def __init__(self, obs=None, name='planet'):
         self.G = 6.67430e-11; # m^3 kg^-1 s^-2 (2018 NIST reference)
         self.opts = _default_opts() # holds user configurable options
         if obs is None:
             obs = _default_planet()
         self.set_observables(obs)
+        self.name = name
 
     def set_observables(self,obs):
         """ Copy physical properties from an observables struct."""
@@ -96,6 +97,48 @@ class TOFPlanet:
             for k in range(P.size-1): # note integrate downward
                 P[k+1] = P[k] + 0.5*(r[k] - r[k+1])*(intgrnd[k] + intgrnd[k+1])
             self.Pi = P
+
+    ### Visualizers
+    def plot_rho_of_r(self):
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(8,6))
+        x = np.append(self.si/self.s0, 0)
+        y = np.append(self.rhoi, self.rhoi[-1])/1000
+        plt.plot(x, y, lw=2, label=self.name)
+        plt.xlabel(r'Level surface radius, $s/s_0$', fontsize=12)
+        plt.ylabel(r'$\rho$ [1000 kg/m$^3$]', fontsize=12)
+        plt.show(block=False)
+
+    def plot_P_of_r(self):
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(8,6))
+        x = self.si/self.s0
+        y = self.Pi/1e9
+        plt.plot(x, y, lw=2, label=self.name)
+        plt.xlabel(r'Level surface radius, $s/s_0$', fontsize=12)
+        plt.ylabel(r'$P$ [GPa]', fontsize=12)
+        plt.show(block=False)
+
+    def plot_P_of_rho(self):
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(8,6))
+        x = self.rhoi/1000
+        y = self.Pi/1e9
+        plt.plot(x, y, lw=2, label=self.name)
+        plt.xlabel(r'$\rho$ [1000 kg/m$^3$]', fontsize=12)
+        plt.ylabel(r'$P$ [GPa]', fontsize=12)
+        plt.show(block=False)
+
+    def plot_rho_of_P(self):
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(8,6))
+        x = self.Pi/1e9
+        y = self.rhoi/1000
+        plt.loglog(x, y, lw=2, label=self.name)
+        plt.xlabel(r'$P$ [GPa]', fontsize=12)
+        plt.ylabel(r'$\rho$ [1000 kg/m$^3$]', fontsize=12)
+        plt.xlim(left=1e-3)
+        plt.show(block=False)
 
 def _mass_int(svec, dvec):
     """Trapz-integrate mass from rho(r) data."""
