@@ -10,6 +10,10 @@ import sys
 import os
 import ahelpers as ah
 
+if len(sys.argv) == 1:
+    print("Usage: python reseed.py filename (usually rundir/final.npz)")
+    sys.exit(0)
+
 fname = sys.argv[1]
 rundir,_ = os.path.split(fname)
 seedfile = os.path.join(rundir, 'reseeds.txt')
