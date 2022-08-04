@@ -186,6 +186,26 @@ methods (Static)
                       obs.dJ10, obs.dJ12, obs.dJ14];
     end
 
+    function obs = Jupiter_winds()
+        % Gravity nominals and uncertainties as in Miguel et al. (2022)
+        obs = observables.Jupiter();
+        obs.J2  = obs.J2  + 1.039e-6;
+        obs.J4  = obs.J4  - 0.076e-6;
+        obs.J6  = obs.J6  + 0.016e-6;
+        obs.J8  = obs.J8  + 0.053e-6;
+        obs.J10 = obs.J10 - 0.080e-6;
+
+        obs.dJ2   = obs.dJ2  + 0.354e-6;
+        obs.dJ4   = obs.dJ4  + 0.083e-6;
+        obs.dJ6   = obs.dJ6  + 0.076e-6;
+        obs.dJ8   = obs.dJ8  + 0.062e-6;
+        obs.dJ10  = obs.dJ10 + 0.042e-6;
+        
+        obs.Js = [-1, obs.J2, obs.J4, obs.J6, obs.J8, obs.J10, obs.J12, obs.J14];
+        obs.dJs = [0, obs.dJ2, obs.dJ4, obs.dJ6, obs.dJ8,...
+                      obs.dJ10, obs.dJ12, obs.dJ14];
+    end
+
     function obs = Saturn()
         obs = observables();
         obs.pname = 'Saturn';
