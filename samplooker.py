@@ -15,7 +15,7 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
-def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
+def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     ice = np.array([p.NMoI for p in planets])
@@ -23,6 +23,8 @@ def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
     # Prepare the canvas
     if newfig:
         plt.figure(figsize=(8,6))
+    else:
+        plt.figure(plt.gcf().number)
 
     # Plot the histogram
     plt.hist(ice, bins=bins, density=density, **kwargs)
