@@ -6,6 +6,8 @@ import sys, os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import ppwd
+import TOFPlanet
 
 def load_planets(fname):
     with open(fname, 'rb') as f:
@@ -13,13 +15,14 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
-def hist_moi(fname, bins='auto', density=True, **kwargs):
+def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     ice = np.array([p.NMoI for p in planets])
 
     # Prepare the canvas
-    plt.figure(figsize=(8,6))
+    if newfig:
+        plt.figure(figsize=(8,6))
 
     # Plot the histogram
     plt.hist(ice, bins=bins, density=density, **kwargs)
