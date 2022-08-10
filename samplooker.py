@@ -1,6 +1,6 @@
-################################################################################
+###############################################################################
 # Some functions for looking at sampels of cooked planets
-################################################################################
+###############################################################################
 
 import sys, os
 import pickle
@@ -15,7 +15,7 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
-def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
+def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     ice = np.array([p.NMoI for p in planets])
@@ -31,6 +31,50 @@ def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
 
     # Style, annotate, and show
     plt.xlabel(r'Normalized moment of inertia, $I/Ma_0^2$')
-    plt.xlim(min(ice),max(ice))
+    plt.xlim(ice.mean()-2*ice.std(),ice.mean()+2*ice.std())
     plt.yticks([])
+    plt.show(block=False)
+
+def hist_J2(fname, newfig=True, bins='auto', density=True, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    J2 = 1e6*np.array([p.Js[1] for p in planets])
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the histogram
+    plt.hist(J2, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'$J_2\times{10^6}$')
+    plt.xlim(J2.mean()-2*J2.std(), J2.mean()+2*J2.std())
+    plt.yticks([])
+    plt.show(block=False)
+
+def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    profs = np.array([p.rhoi for p in planets]).T
+    rcs = profs[-1,:]
+    ind = np.argsort(rcs)
+    profs = profs[:,ind]
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the lines
+    x = planets[0].si/planets[0].s0
+    x = np.append(x, 0)
+    skip = int(np.ceil(len(planets)/nlines))
+    for k in range(0,len(planets),skip):
+        y = profs[:,k]
+        y = np.append(y,y[-1])
+        plt.plot(x,y,alpha=alfa,**kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Level surface radius, $s/R_m$')
+    plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
