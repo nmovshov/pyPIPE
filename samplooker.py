@@ -100,3 +100,20 @@ def density_envelope(fname, newfig=True, prctile=2, **kwargs):
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
+
+def plot_profile(s, rho, newfig=True, **kwargs):
+    # Prepare the data
+    x = np.append(s, 0)/s[0]
+    y = np.append(rho, rho[-1])/1000
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the lines
+    plt.plot(x, y, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Level surface radius, $s/R_m$')
+    plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.show(block=False)

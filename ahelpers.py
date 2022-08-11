@@ -15,6 +15,11 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
+def load_profiles(fname):
+    planets = load_planets(fname)
+    profs = np.array([p.rhoi for p in planets]).T
+    return profs
+
 def density_prctiles(profs, prcs):
     """High and low density values of symmetric percentile in sample."""
     prcs_lo = prcs
