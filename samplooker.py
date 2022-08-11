@@ -78,3 +78,25 @@ def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
+
+def density_envelope(fname, newfig=True, prctile=2, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    profs = np.array([p.rhoi for p in planets]).T
+    prcs_lo = prctile
+    prcs_hi = 100 - prcs_lo
+    x = planets[0].si/planets[0].s0
+    ylo = np.percentile(profs, prcs_lo, axis=1)/1000
+    yhi = np.percentile(profs, prcs_hi, axis=1)/1000
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the shaded regions
+    plt.fill_between(x, ylo, yhi, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Level surface radius, $s/R_m$')
+    plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.show(block=False)

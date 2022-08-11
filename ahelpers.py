@@ -7,6 +7,22 @@ import numpy as np
 from scipy.stats import norm, chi2
 cout = sys.stdout.write
 
+def load_planets(fname):
+    import pickle
+    import TOFPlanet
+    with open(fname, 'rb') as f:
+        planets = pickle.load(f)
+        print(f"Found {len(planets)} planets in {fname}.")
+    return planets
+
+def density_prctiles(profs, prcs):
+    """High and low density values of symmetric percentile in sample."""
+    prcs_lo = prcs
+    prcs_hi = 100 - prcs_lo
+    YLO = np.percentile(profs, prcs_lo, axis=1)
+    YHI = np.percentile(profs, prcs_hi, axis=1)
+    return (YLO, YHI)
+
 def _sig2mahal(sig,p):
     """Return Mahalanobis distance in p dims equivalent to Z-score sig."""
     return np.sqrt(chi2.ppf(norm.cdf(sig) - norm.cdf(-sig), p))
