@@ -15,6 +15,26 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
+def hist_mass(fname, newfig=True, bins='auto', density=True, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    M = np.array([p.M for p in planets])/1e24
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+    else:
+        plt.figure(plt.gcf().number)
+
+    # Plot the histogram
+    plt.hist(M, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Integrated mass $M$ [$10^{24}$ kg]')
+    plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
+    plt.yticks([])
+    plt.show(block=False)
+
 def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
