@@ -31,7 +31,7 @@ def hist_mass(fname, newfig=True, bins='auto', density=True, **kwargs):
 
     # Style, annotate, and show
     plt.xlabel(r'Integrated mass $M$ [$10^{24}$ kg]')
-    plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
+    # plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
     plt.yticks([])
     plt.show(block=False)
 
@@ -51,7 +51,7 @@ def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
 
     # Style, annotate, and show
     plt.xlabel(r'Normalized moment of inertia, $I/Ma_0^2$')
-    plt.xlim(ice.mean()-2*ice.std(),ice.mean()+2*ice.std())
+    # plt.xlim(ice.mean()-2*ice.std(),ice.mean()+2*ice.std())
     plt.yticks([])
     plt.show(block=False)
 
@@ -69,7 +69,7 @@ def hist_J2(fname, newfig=True, bins='auto', density=True, **kwargs):
 
     # Style, annotate, and show
     plt.xlabel(r'$J_2\times{10^6}$')
-    plt.xlim(J2.mean()-2*J2.std(), J2.mean()+2*J2.std())
+    # plt.xlim(J2.mean()-2*J2.std(), J2.mean()+2*J2.std())
     plt.yticks([])
     plt.show(block=False)
 

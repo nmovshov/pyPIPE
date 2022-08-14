@@ -5,7 +5,5 @@ import numpy as np
 
 sys.path.append(os.getcwd())
 
-import dprofs
-import priors
-import losses
-import tof4
+import observables
+import ppwd
