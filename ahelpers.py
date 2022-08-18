@@ -416,7 +416,7 @@ def samplify_chain(fname,ws='all',burn=0,skip=1):
     np.savez_compressed(sf,Z=Z)
     af = os.path.join(out_dir, os.path.basename(cf)[:-3]+'txt')
     print("saving to", af)
-    np.savetxt(af, Z, header=f"walkers = {ws}; burn = {burn}; skip = {skip}")
+    np.savetxt(af, Z)
 
 def _fixpoly(x,rho0):
     return np.hstack((x,0,rho0-np.polyval(np.hstack((x,0,0)),1)))
