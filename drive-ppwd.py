@@ -111,7 +111,7 @@ def _lnprob(x,obs,args):
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
-    return -0.5*dsqr + P
+    return -0.5*(dsqr/args.temperature) + P
 
 def _read_seeds(args, outdir, obs):
     """Generic seed reader.
@@ -303,6 +303,9 @@ def _PCL():
 
     likegroup = parser.add_argument_group('Likelihood options')
 
+    likegroup.add_argument('-T', '--temperature', type=float, default=1.0,
+        help="Simulated annealing temperature.")
+
     likegroup.add_argument('-j', '--Jays', type=int, nargs='*', default=[2,4],
         help="J-coefficients to include in likelihood; 0 to ignore gravity")
 
@@ -375,6 +378,7 @@ def _PCL():
 
     assert np.all(np.remainder(args.Jays,2) == 0), "Js must be even."
     assert np.all(np.array(args.Jays) >= 0), "Js must be nonnegative"
+    assert args.temperature > 0, "Temperature must be positive."
     args.Jays = np.array(args.Jays)
     if args.restart:
         args.serialize = True
