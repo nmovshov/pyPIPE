@@ -225,7 +225,7 @@ def _main(spool,args):
     sampler = emcee.EnsembleSampler(nwalkers, ndims, _lnprob, args=[obs,args],
             pool=pool, backend=backend, moves=moves)
     print("Using {} walkers on {} dimensions.".format(nwalkers, ndims))
-    print("Using {} move strategy.".format(args.moves))
+    print("Temperature T={}.".format(args.temperature))
 
     # OPTIONAL TWEAKS TO SAMPLER HERE
     #sampler.a = ...
