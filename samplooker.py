@@ -173,3 +173,43 @@ def plot_profile(s, rho, newfig=True, **kwargs):
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
+
+def hist_mass_err(fname,obs,newfig=True,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    M_err = (np.array([p.M for p in planets]) - obs.M)/obs.dM
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+    else:
+        plt.figure(plt.gcf().number)
+
+    # Plot the histogram
+    plt.hist(M_err, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'$(M-M^\mathrm{obs})/\sigma{M}^\mathrm{obs}$')
+    # plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
+    plt.yticks([])
+    plt.show(block=False)
+
+def hist_J2_err(fname,obs,newfig=True,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    J_err = (np.array([p.Js[1] for p in planets]) - obs.J2)/obs.dJ2
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+    else:
+        plt.figure(plt.gcf().number)
+
+    # Plot the histogram
+    plt.hist(J_err, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'$(J_2-J_2^\mathrm{obs})/\sigma{J_2}^\mathrm{obs}$')
+    # plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
+    plt.yticks([])
+    plt.show(block=False)
