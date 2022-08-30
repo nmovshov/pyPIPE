@@ -121,6 +121,42 @@ def density_envelope(fname, newfig=True, prctile=2, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
+def barotrope_envelope(fname, newfig=True, prctile=2, **kwargs):
+    from scipy.interpolate import interp1d
+    # Prepare the data
+    planets = load_planets(fname)
+    pees = 1e-11*np.array([p.Pi for p in planets]).T
+    rhos = 1e-3*np.array([p.rhoi for p in planets]).T
+    x = np.logspace(-6, np.ceil(np.log10(pees.max())), 1024)
+    y = np.nan*np.ones((1024, len(planets)))
+    for k in range(len(planets)):
+        rhoofp = interp1d(pees[:,k], rhos[:,k], kind='cubic')
+        ind = x < pees[-1,k]
+        y[ind,k] = rhoofp(x[ind])
+
+    prcs_lo = prctile
+    prcs_hi = 100 - prcs_lo
+    ylo = np.nanpercentile(y, prcs_lo, axis=1)
+    yhi = np.nanpercentile(y, prcs_hi, axis=1)
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the shaded regions
+    ind = ~np.isnan(ylo)
+    plt.fill_between(x[ind], ylo[ind], yhi[ind], **kwargs)
+
+    # Style, annotate, and show
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlim(left=1e-5)
+    plt.ylim(1e-3, 100)
+    plt.vlines(pees[-1,:].min(), *plt.ylim(), linestyle=':', color='r')
+    plt.xlabel(r'$p$ [Mbar]')
+    plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.show(block=False)
+
 def plot_profile(s, rho, newfig=True, **kwargs):
     # Prepare the data
     x = np.append(s, 0)/s[0]
