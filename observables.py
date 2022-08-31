@@ -227,6 +227,34 @@ class Saturn:
     Js = np.array((-1, J2, J4, J6, J8, J10, J12, J14))
     dJs = np.array((0, dJ2, dJ4, dJ6, dJ8, dJ10, dJ12, dJ14))
 
+    def __init__(self, **kwargs):
+        """Customize instance."""
+
+        # First override any defaults with directly supplied value
+        for kw, val in kwargs.items():
+            if kw in dir(self) and kwargs[kw] is not None:
+                setattr(self, kw, val)
+
+        # Let user override dJs and dM with more convenient *relative* sigs
+        if 'J2_sig' in kwargs and kwargs['J2_sig'] is not None:
+            self.dJ2 = abs(kwargs['J2_sig']*self.J2)
+        if 'J4_sig' in kwargs and kwargs['J4_sig'] is not None:
+            self.dJ4 = abs(kwargs['J4_sig']*self.J4)
+        if 'J6_sig' in kwargs and kwargs['J6_sig'] is not None:
+            self.dJ6 = abs(kwargs['J6_sig']*self.J6)
+        if 'J8_sig' in kwargs and kwargs['J8_sig'] is not None:
+            self.dJ8 = abs(kwargs['J8_sig']*self.J8)
+        if 'J10_sig' in kwargs and kwargs['J10_sig'] is not None:
+            self.dJ10 = abs(kwargs['J10_sig']*self.J10)
+        if 'M_sig' in kwargs and kwargs['M_sig'] is not None:
+            self.dM = kwargs['M_sig']*self.M
+
+        # We have to manually reset Js and dJs for this instance
+        self.Js = np.array(
+                (-1,self.J2,self.J4,self.J6,self.J8,self.J10,self.J12,self.J14))
+        self.dJs = np.array(
+                (0,self.dJ2,self.dJ4,self.dJ6,self.dJ8,self.dJ10,self.dJ12,self.dJ14))
+
 class Saturn_tof4(Saturn):
     """Modify gravity uncertainties to tof4 truncation error."""
     dJ2  = 1e-4*np.abs(Saturn.J2)
