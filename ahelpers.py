@@ -42,7 +42,13 @@ def winners(C,L,df,prior,sig=2.5):
     wins = np.squeeze(np.argwhere((L - P) > thresh))
     return wins
 
-def find_outwalkers(chain,thresh=3.0):
+def filter_walker_acceptance(fname,t=1.0):
+    """Return logical array where walker ar > than mu - t*sig."""
+    C,_ = load_chain(fname)
+    A = acceptance_ratio(C)
+    return A > (A.mean() - t*A.std())
+
+def _find_outwalkers(chain,thresh=3.0):
     """Try to detect outlier walkers in ensemble sampler chain."""
     C = chain
     t = thresh
