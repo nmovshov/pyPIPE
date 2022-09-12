@@ -27,7 +27,9 @@ def cook_planet(x, obs, opts):
     p.rhoi = dvec
     p.opts['toforder'] = opts.toforder
     p.opts['xlevels'] = opts.xlevels
-    p.relax_to_HE(fixradius=True, moi=opts.with_moi, pressure=opts.with_pressure)
+    if not opts.no_spin:
+        p.relax_to_HE(fixradius=True, moi=opts.with_moi,
+                      pressure=opts.with_pressure)
     return p
 
 def _PCL():

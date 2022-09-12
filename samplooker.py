@@ -73,6 +73,23 @@ def hist_J2(fname, newfig=True, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
+def hist_rho_c(fname, newfig=True, bins='auto', density=True, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    rcs = np.array([p.rhoi[-1] for p in planets])
+
+    # Prepare the canvas
+    if newfig:
+        plt.figure(figsize=(8,6))
+
+    # Plot the histogram
+    plt.hist(rcs, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'$\rho_c$ [1000 kg/m$^3$]')
+    plt.yticks([])
+    plt.show(block=False)
+
 def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
