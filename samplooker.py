@@ -15,16 +15,19 @@ def load_planets(fname):
         print(f"Found {len(planets)} planets in {fname}.")
     return planets
 
-def hist_mass(fname, newfig=True, bins='auto', density=True, **kwargs):
+def _get_canvas(newfig):
+    if newfig or not plt.get_fignums():
+        plt.figure(figsize=(8,6))
+    else:
+        plt.figure(plt.gcf().number)
+
+def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     M = np.array([p.M for p in planets])/1e24
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
-    else:
-        plt.figure(plt.gcf().number)
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(M, bins=bins, density=density, **kwargs)
@@ -35,16 +38,13 @@ def hist_mass(fname, newfig=True, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
+def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     ice = np.array([p.NMoI for p in planets])
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
-    else:
-        plt.figure(plt.gcf().number)
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(ice, bins=bins, density=density, **kwargs)
@@ -55,14 +55,13 @@ def hist_moi(fname, newfig=True, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J2(fname, newfig=True, bins='auto', density=True, **kwargs):
+def hist_J2(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     J2 = 1e6*np.array([p.Js[1] for p in planets])
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(J2, bins=bins, density=density, **kwargs)
@@ -73,14 +72,13 @@ def hist_J2(fname, newfig=True, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_rho_c(fname, newfig=True, bins='auto', density=True, **kwargs):
+def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     rcs = np.array([p.rhoi[-1] for p in planets])
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(rcs, bins=bins, density=density, **kwargs)
@@ -90,7 +88,7 @@ def hist_rho_c(fname, newfig=True, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
+def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     profs = np.array([p.rhoi for p in planets]).T
@@ -99,8 +97,7 @@ def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
     profs = profs[:,ind]
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the lines
     x = planets[0].si/planets[0].s0
@@ -116,7 +113,7 @@ def ensemble_of_profs(fname, newfig=True, nlines=20, alfa=0.4, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def density_envelope(fname, newfig=True, prctile=2, **kwargs):
+def density_envelope(fname, newfig=False, prctile=2, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
     profs = np.array([p.rhoi for p in planets]).T
@@ -127,8 +124,7 @@ def density_envelope(fname, newfig=True, prctile=2, **kwargs):
     yhi = np.percentile(profs, prcs_hi, axis=1)/1000
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the shaded regions
     plt.fill_between(x, ylo, yhi, **kwargs)
@@ -138,7 +134,7 @@ def density_envelope(fname, newfig=True, prctile=2, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def barotrope_envelope(fname, newfig=True, prctile=2, **kwargs):
+def barotrope_envelope(fname, newfig=False, prctile=2, **kwargs):
     from scipy.interpolate import interp1d
     # Prepare the data
     planets = load_planets(fname)
@@ -157,8 +153,7 @@ def barotrope_envelope(fname, newfig=True, prctile=2, **kwargs):
     yhi = np.nanpercentile(y, prcs_hi, axis=1)
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the shaded regions
     ind = ~np.isnan(ylo)
@@ -174,14 +169,13 @@ def barotrope_envelope(fname, newfig=True, prctile=2, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def plot_profile(s, rho, newfig=True, **kwargs):
+def plot_profile(s, rho, newfig=False, **kwargs):
     # Prepare the data
     x = np.append(s, 0)/s[0]
     y = np.append(rho, rho[-1])/1000
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
+    _get_canvas(newfig)
 
     # Plot the lines
     plt.plot(x, y, **kwargs)
@@ -191,16 +185,13 @@ def plot_profile(s, rho, newfig=True, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def hist_mass_err(fname,obs,newfig=True,bins='auto',density=True,**kwargs):
+def hist_mass_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
     planets = load_planets(fname)
     M_err = (np.array([p.M for p in planets]) - obs.M)/obs.dM
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
-    else:
-        plt.figure(plt.gcf().number)
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(M_err, bins=bins, density=density, **kwargs)
@@ -211,16 +202,13 @@ def hist_mass_err(fname,obs,newfig=True,bins='auto',density=True,**kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J2_err(fname,obs,newfig=True,bins='auto',density=True,**kwargs):
+def hist_J2_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
     planets = load_planets(fname)
     J_err = (np.array([p.Js[1] for p in planets]) - obs.J2)/obs.dJ2
 
     # Prepare the canvas
-    if newfig:
-        plt.figure(figsize=(8,6))
-    else:
-        plt.figure(plt.gcf().number)
+    _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(J_err, bins=bins, density=density, **kwargs)
