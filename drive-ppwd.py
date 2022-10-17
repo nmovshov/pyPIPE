@@ -65,32 +65,20 @@ def _lnprob(x,obs,args):
     else:
         tof = tof7.tof7
 
-    # Parameter vector x may or may not include a rotation parameter and rho0
-    if not args.fix_rho0 and not args.fix_mrot:
-        mrot = x[0]
-        rho0 = x[1]
-        xx = x[2:]
-    elif not args.fix_rho0:
+    # Parameter vector x may or may not include a rotation parameter
+    if args.fix_mrot:
         mrot = obs.m
-        rho0 = x[0]
-        xx = x[1:]
-    elif not args.fix_mrot:
-        mrot = x[0]
-        rho0 = obs.rho0
-        xx = x[1:]
-    else:
-        mrot = obs.m
-        rho0 = obs.rho0
         xx = x
+    else:
+        mrot = x[0]
+        xx = x[1:]
 
     # Evaluate prior on sample-space parameters
-    P = (the_prior(xx, obs) +
-         generic_priors.rotation_prior(mrot, obs) +
-         generic_priors.rho0_prior(rho0, obs))
+    P = (the_prior(xx, obs) + generic_priors.rotation_prior(mrot, obs))
 
     # Transform from sample space to model space and create the density profile
     y = the_transform(xx, obs)
-    svec, dvec = the_mdl(args.toflevels, y, rho0)
+    svec, dvec = the_mdl(args.toflevels, y, obs.rho0)
     svec = svec*obs.s0
 
     # Evaluate prior on pre-solved planet
@@ -105,9 +93,13 @@ def _lnprob(x,obs,args):
                       xlevels=args.xlevels,
                       calc_moi=args.with_moi)
         svec = svec*obs.a0/(svec[0]*out.a0)
+        if args.fix_mass:
+            m = ah.mass_integral(svec,dvec)
+            dvec = dvec*obs.M/m
 
         jflag = args.Jays[args.Jays > 0]
         dsqr = (losses.mass((svec,dvec),obs)**2 +
+                losses.rho0((svec,dvec),obs)**2 +
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
@@ -164,7 +156,7 @@ def _main(spool,args):
         obs.a0 = obs.s0
 
     # Make a directory to store output
-    outdir = '{}deg-{}-ppwd_{}'.format(args.prefix,args.degree,obs.pname)
+    outdir = '{}_{}_run'.format(args.prefix,obs.pname)
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
     else:
@@ -326,11 +318,8 @@ def _PCL():
 
     mdlgroup = parser.add_argument_group('Additional model options')
 
-    mdlgroup.add_argument('-d', '--degree', type=int, default=8,
-        help="PPWD polynomial degree")
-
-    mdlgroup.add_argument('--fix-rho0', type=int, default=1,
-        help="Don't sample 1-bar density (use obs.rho0 instead)")
+    mdlgroup.add_argument('--fix-mass', type=int, default=1,
+        help="Normalize converged model mass to obs.M")
 
     mdlgroup.add_argument('--fix-mrot', type=int, default=1,
         help="Don't sample rotation parameter (use obs.m instead)")

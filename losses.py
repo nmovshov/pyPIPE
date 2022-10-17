@@ -42,8 +42,13 @@ def mass(tof, obs):
     m = ah.mass_integral(*tof)
     return np.sqrt(((m - obs.M)/obs.dM)**2)
 
+
 def NMoI(I, obs):
     return np.sqrt(((I - obs.NMoI)/obs.dNMoI)**2)
+
+def rho0(tof, obs):
+    """A prior on 1-bar density."""
+    return np.sqrt(((tof[1][0] - obs.rho0)/(obs.drho0))**2)
 
 def rhomax(tof, obs):
     """A penalty on unreasonably high central density."""

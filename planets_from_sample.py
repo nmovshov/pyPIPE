@@ -28,7 +28,8 @@ def cook_planet(x, obs, opts):
     p.opts['toforder'] = opts.toforder
     p.opts['xlevels'] = opts.xlevels
     if not opts.no_spin:
-        p.relax_to_HE(fixradius=True, moi=opts.with_moi,
+        p.relax_to_HE(fixradius=True, fixmass=opts.fix_mass,
+                      moi=opts.with_moi,
                       pressure=opts.with_pressure)
     return p
 
@@ -52,8 +53,8 @@ def _PCL():
 
     mdlgroup = parser.add_argument_group('Additional model options')
 
-    mdlgroup.add_argument('--fix-rho0', type=int, default=1,
-        help="Don't sample 1-bar density (use obs.rho0 instead)")
+    mdlgroup.add_argument('--fix-mass', type=int, default=1,
+        help="Normalize converged model mass to obs.M")
 
     mdlgroup.add_argument('--fix-mrot', type=int, default=1,
         help="Don't sample rotation parameter (use obs.m instead)")
