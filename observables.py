@@ -516,12 +516,12 @@ class HAT_P_13_b:
     k2 = 0.2705
     dk2 = 0.155
 
-    # Boundary conditions
-    P0 = 1e5
-    T0 = None; dT0 = None
-    rho0 = None
-    drho0 = None
-    rhomax = None
+    # Boundary conditions (Bakos et al. 2009)
+    P0 = 1e5            # The reference radius is the 1 bar level
+    T0 = 1653; dT0 = 45 # Table 4
+    rho0 = 0.0169       # Protosolar ideal gas (mmw=2.319 amu) at (P0,T0)
+    drho0 = 0.0005      # half the range of T0+/-dT0
+    rhomax = 30000      # A guess, ANEOS serpentine at 50 Mbar is ~15000
 
     # Some methods (e.g. priors.py) use these fiducial values for scale...
     rhobar = None
