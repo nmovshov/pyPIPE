@@ -501,5 +501,62 @@ class Neptune_uncertain_rotation(Neptune_ppwd):
     dq = 2*Neptune.w*Neptune.a0**3/Neptune.GM*dw
     dm = 2*Neptune.w*Neptune.s0**3/Neptune.GM*dw
 
+class HAT_P_13_b:
+    pname = 'HAT-P-13-b'
+
+    # Bakos et al. 2009
+    M  = 0.85*Jupiter().M
+    dM = 0.05*Jupiter().M
+    a0 = 1.28*Jupiter().a0
+    s0 = a0
+
+    # From Batygin et al. 2009
+    Qlo = 10000
+    Qhi = 300000
+    k2 = 0.2705
+    dk2 = 0.155
+
+    # Boundary conditions
+    P0 = 1e5
+    T0 = None; dT0 = None
+    rho0 = None
+    drho0 = None
+    rhomax = None
+
+    # Some methods (e.g. priors.py) use these fiducial values for scale...
+    rhobar = None
+
+    # Empty placeholders for Js and dJs
+    Js = np.array((-1., 0, 0, 0, 0, 0, 0, 0))
+    dJs = np.array((0,np.inf,np.inf,np.inf,np.inf,np.inf,np.inf,np.inf))
+
+    def __init__(self, **kwargs):
+        """Customize instance."""
+
+        # First override any defaults with directly supplied value
+        for kw, val in kwargs.items():
+            if kw in dir(self) and kwargs[kw] is not None:
+                setattr(self, kw, val)
+
+        # Let user override dJs and dM with more convenient *relative* sigs
+        if 'J2_sig' in kwargs and kwargs['J2_sig'] is not None:
+            self.dJ2 = abs(kwargs['J2_sig']*self.J2)
+        if 'J4_sig' in kwargs and kwargs['J4_sig'] is not None:
+            self.dJ4 = abs(kwargs['J4_sig']*self.J4)
+        if 'J6_sig' in kwargs and kwargs['J6_sig'] is not None:
+            self.dJ6 = abs(kwargs['J6_sig']*self.J6)
+        if 'J8_sig' in kwargs and kwargs['J8_sig'] is not None:
+            self.dJ8 = abs(kwargs['J8_sig']*self.J8)
+        if 'J10_sig' in kwargs and kwargs['J10_sig'] is not None:
+            self.dJ10 = abs(kwargs['J10_sig']*self.J10)
+        if 'M_sig' in kwargs and kwargs['M_sig'] is not None:
+            self.dM = kwargs['M_sig']*self.M
+
+        # We have to manually reset Js and dJs for this instance
+        self.Js = np.array(
+                (-1,self.J2,self.J4,self.J6,self.J8,self.J10,self.J12,self.J14))
+        self.dJs = np.array(
+                (0,self.dJ2,self.dJ4,self.dJ6,self.dJ8,self.dJ10,self.dJ12,self.dJ14))
+
 if __name__ == "__main__":
     print(Saturn)
