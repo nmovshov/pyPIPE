@@ -529,9 +529,11 @@ class HAT_P_13_b:
     GM = G*M
     q = w**2*a0**3/GM
     m = w**2*s0**3/GM
+    dq = np.inf
+    dm = np.inf
 
     # Some methods (e.g. priors.py) use these fiducial values for scale...
-    rhobar = None
+    rhobar = M/(4*np.pi/3*s0**3)
 
     # Empty placeholders for Js and dJs
     Js = np.array((-1., 0, 0, 0, 0, 0, 0, 0))
