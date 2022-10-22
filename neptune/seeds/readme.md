@@ -1,1 +1,0 @@
-Seeds for Neptune sampling.
