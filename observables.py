@@ -187,15 +187,15 @@ class Saturn:
     drho0 = 0.0057      # half the range of T0+/-dT0
     rhomax = 20000      # A guess, ANEOS serpentine at 50 Mbar is ~15000
 
-    # Nominal rotation rate, Mankovich (2019) rounded to the minute
-    P = 38040 # 10 hours 34 minutes
+    # Nominal rotation rate e.g. Mankovich (2019)
+    P = 38014 # 10 hours 33 minutes 34 seconds
     w = 2*np.pi/P
     GM = G*M
     q = w**2*a0**3/GM
     m = w**2*s0**3/GM
 
     # Sometimes we use an estimate of roation period uncertainty
-    dP = 120 # A 2-sigma ~= 2-minute spread of modern estimates
+    dP = 60 # A 2-sigma ~= 1-minute spread of modern estimates
     dw = 2*np.pi/P**2*dP
     dq = 2*w*a0**3/GM*dw
     dm = 2*w*s0**3/GM*dw
