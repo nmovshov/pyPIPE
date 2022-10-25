@@ -234,3 +234,30 @@ def hist_J2_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     # plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
     plt.yticks([])
     plt.show(block=False)
+
+def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    s0 = np.array([p.s0 for p in planets])
+    mrot = np.array([p.mrot for p in planets])
+    GM = np.array([p.GM for p in planets])
+    w_rot = np.sqrt(mrot*GM/s0**3)
+    P_rot = 2*np.pi/w_rot
+    if obs is None:
+        P_fid = P_rot.mean()
+    else:
+        P_fid = obs.P
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot the histogram
+    plt.hist(P_rot - P_fid, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    fid_h = int(P_fid/3600)
+    fid_m = int((P_fid%3600)/60)
+    fid_s = np.round((P_fid%3600)%60,1)
+    plt.xlabel(f'rotation period  - {fid_h}:{fid_m}:{fid_s}')
+    plt.yticks([])
+    plt.show(block=False)
