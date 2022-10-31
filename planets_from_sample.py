@@ -31,6 +31,8 @@ def cook_planet(x, obs, opts):
         p.relax_to_HE(fixradius=True, fixmass=opts.fix_mass,
                       moi=opts.with_moi,
                       pressure=opts.with_pressure)
+    if opts.with_k2:
+        p.k2 = ah.lovek2(p.si, p.rhoi)
     return p
 
 def _PCL():
@@ -61,6 +63,9 @@ def _PCL():
 
     mdlgroup.add_argument('--no-spin', action='store_true',
         help="Make spherical planet (sets obs.m to zero)")
+
+    mdlgroup.add_argument('--with-k2', action='store_true',
+        help="Include tidal k2 calculation")
 
     tofgroup = parser.add_argument_group('TOF options',
         'Options controlling ToF gravity calculation')

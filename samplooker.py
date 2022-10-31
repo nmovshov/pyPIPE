@@ -261,3 +261,24 @@ def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs)
     plt.xlabel(f'rotation period  - {fid_h}:{fid_m}:{fid_s}')
     plt.yticks([])
     plt.show(block=False)
+
+def hist_attr(fname, attr,
+    obs=None,newfig=False,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    vals = np.array([getattr(p,attr,np.nan) for p in planets])
+    if obs is None:
+        v_fid = vals.mean()
+    else:
+        v_fid = getattr(obs,'attr')
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot the histogram
+    plt.hist(vals, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(attr)
+    plt.yticks([])
+    plt.show(block=False)

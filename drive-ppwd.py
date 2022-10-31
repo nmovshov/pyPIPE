@@ -103,8 +103,8 @@ def _lnprob(x,obs,args):
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
-        if args.with_k2:
-            dsqr += losses.k2((svec, dvec), obs)**2
+    if args.with_k2:
+        dsqr += losses.k2((svec, dvec), obs)**2
     return -0.5*(dsqr/args.temperature) + P
 
 def _read_seeds(args, outdir, obs):
