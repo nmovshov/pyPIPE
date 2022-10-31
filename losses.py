@@ -38,22 +38,25 @@ def smooth_J_box(Js, obs, ord=(2,4,6)):
     WD = np.array(WD)
     return np.sqrt(sum(WD**2))
 
-def mass(tof, obs):
-    m = ah.mass_integral(*tof)
+def mass(prof, obs):
+    m = ah.mass_integral(*prof)
     return np.sqrt(((m - obs.M)/obs.dM)**2)
 
+def k2(prof, obs):
+    k2 = ah.lovek2(*prof)
+    return np.sqrt(((k2 - obs.k2)/obs.dk2)**2)
 
 def NMoI(I, obs):
     return np.sqrt(((I - obs.NMoI)/obs.dNMoI)**2)
 
-def rho0(tof, obs):
+def rho0(prof, obs):
     """A prior on 1-bar density."""
-    return np.sqrt(((tof[1][0] - obs.rho0)/(obs.drho0))**2)
+    return np.sqrt(((prof[1][0] - obs.rho0)/(obs.drho0))**2)
 
-def rhomax(tof, obs):
+def rhomax(prof, obs):
     """A penalty on unreasonably high central density."""
 
-    romax = tof[1][-1]
+    romax = prof[1][-1]
     return (max(romax, obs.rhomax) - obs.rhomax)/obs.rhobar
 
 def _mloss(prof,Js,obs,jflag):

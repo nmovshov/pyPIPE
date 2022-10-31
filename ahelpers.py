@@ -72,6 +72,28 @@ def mass_integral(svec, dvec):
     from scipy.integrate import trapz
     return -4*np.pi*trapz(dvec*svec**2, x=svec)
 
+def lovek2(zvec, dvec):
+    """ Tidal Love number k2 from density profile."""
+    if zvec[1] - zvec[0] < 0:
+        zvec = zvec[::-1]
+        dvec = dvec[::-1]
+    m = dvec[0]*zvec[0]**3; # starting mass
+    rhom = m/zvec[0]**3; # starting mean density
+    eta = 0
+    for k in range(zvec.size - 1):
+        s1 = (6 - 6*(dvec[k]/rhom)*(eta + 1) + eta - eta**2)/zvec[k];
+        zhalf = zvec[k] + 0.5*(zvec[k+1] - zvec[k]);
+        dhalf = dvec[k] + 0.5*(dvec[k+1] - dvec[k]);
+        mhalf = m + dhalf*(zhalf**3 - zvec[k]**3);
+        rhalf = mhalf/zhalf**3;
+        ehalf = eta + s1*(zhalf - zvec[k]);
+        s2 = (6 - 6*(dhalf/rhalf)*(ehalf + 1) + ehalf - ehalf**2)/zhalf;
+        eta = eta + s2*(zvec[k+1] - zvec[k]);
+        m = mhalf + dvec[k+1]*(zvec[k+1]**3 - zhalf**3);
+        rhom = m/zvec[k+1]**3;
+    k2 = (3 - eta)/(2 + eta)
+    return k2
+
 def load_chain(fname):
     """Load a chain from dump file and return as np arrays C and L."""
 

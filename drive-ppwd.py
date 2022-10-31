@@ -103,6 +103,8 @@ def _lnprob(x,obs,args):
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
+        if args.with_k2:
+            dsqr += losses.k2((svec, dvec), obs)**2
     return -0.5*(dsqr/args.temperature) + P
 
 def _read_seeds(args, outdir, obs):
@@ -312,6 +314,9 @@ def _PCL():
 
     likegroup.add_argument('-I','--with-moi', action='store_true',
         help="Use NMoI in likelihood evaluation")
+
+    likegroup.add_argument('--with-k2', action='store_true',
+        help="Use tidal Love number K2 in likelihood evaluation")
 
     likegroup.add_argument('-f', '--fakelike', action='store_true',
         help="Use fake (uniform) likelihood function (e.g. to test prior)")
