@@ -268,15 +268,19 @@ def hist_attr(fname, attr,
     planets = load_planets(fname)
     vals = np.array([getattr(p,attr,np.nan) for p in planets])
     if obs is None:
-        v_fid = vals.mean()
+        v_mu = vals.mean()
+        v_sig = vals.std()
     else:
-        v_fid = getattr(obs,'attr')
+        v_mu = getattr(obs,attr)
+        v_sig = getattr(obs, 'd'+attr)
 
     # Prepare the canvas
     _get_canvas(newfig)
 
     # Plot the histogram
     plt.hist(vals, bins=bins, density=density, **kwargs)
+    plt.vlines(v_mu, *plt.ylim(), ls='--', lw=2, color='k')
+    plt.vlines([v_mu-v_sig,v_mu+v_sig], *plt.ylim(), ls=':', lw=1, color='k')
 
     # Style, annotate, and show
     plt.xlabel(attr)
