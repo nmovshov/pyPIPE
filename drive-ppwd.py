@@ -87,8 +87,7 @@ def _lnprob(x,obs,args):
 
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
-    if ((P > generic_priors._unlikely()) and (not args.fakelike)
-                                         and (not args.no_spin)):
+    if (P > generic_priors._unlikely()) and (not args.fakelike):
         Js, out = tof(svec, dvec, mrot,
                       xlevels=args.xlevels,
                       calc_moi=args.with_moi)
@@ -103,8 +102,8 @@ def _lnprob(x,obs,args):
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(out.NMoI, obs)**2
-    if args.with_k2:
-        dsqr += losses.k2((svec, dvec), obs)**2
+        if args.with_k2:
+            dsqr += losses.k2((svec, dvec), obs)**2
     return -0.5*(dsqr/args.temperature) + P
 
 def _read_seeds(args, outdir, obs):

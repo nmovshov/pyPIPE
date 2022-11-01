@@ -77,6 +77,7 @@ def lovek2(zvec, dvec):
     if zvec[1] - zvec[0] < 0:
         zvec = zvec[::-1]
         dvec = dvec[::-1]
+    zvec = zvec/zvec[-1]
     m = dvec[0]*zvec[0]**3; # starting mass
     rhom = m/zvec[0]**3; # starting mean density
     eta = 0
