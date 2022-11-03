@@ -148,7 +148,8 @@ def _main(spool,args):
         obs = getattr(observables, args.observables)(
                 J2_sig=args.J2_error,
                 J4_sig=args.J4_error,
-                M_sig=args.M_error)
+                M_sig=args.M_error,
+                dk2=args.k2_error)
     except:
         raise ValueError(
                 "Could not determine target planet; check command line.")
@@ -316,6 +317,9 @@ def _PCL():
 
     likegroup.add_argument('--with-k2', action='store_true',
         help="Use tidal Love number K2 in likelihood evaluation")
+
+    likegroup.add_argument('--k2-error', type=float, default=None,
+        help="Overrides obs.dk2")
 
     likegroup.add_argument('-f', '--fakelike', action='store_true',
         help="Use fake (uniform) likelihood function (e.g. to test prior)")
