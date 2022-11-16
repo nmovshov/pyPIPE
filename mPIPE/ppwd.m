@@ -237,6 +237,11 @@ methods(Static)
         y = [y1, y2, y3];
     end
 
+    function a = quadratic_planet(M, R, rho0)
+        % Return a s.t. rho(r) = a*(r/R)^2 - a integrates to M.
+        a = 5/2*rho0 - 15*M/8/pi/R^3;
+    end
+
     function s = supports(obs)
         if nargin < 1, obs = []; end
         s.z1 = [0.05, 0.5];
