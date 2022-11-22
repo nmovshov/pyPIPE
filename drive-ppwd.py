@@ -43,6 +43,7 @@ import losses
 import generic_priors
 import observables
 import tof4, tof7
+import TOFPlanet
 import ahelpers as ah
 
 ### PROJECT-SPECIFIC COMPONENTS ###
@@ -59,18 +60,15 @@ the_transform = ppwd.ppwd_transform
 ###
 
 def _lnprob(x,obs,args):
-    """Generate, relax, and evaluate a model planet using TOF."""
-    if args.toforder == 4:
-        tof = tof4.tof4
-    else:
-        tof = tof7.tof7
-
+    """Generate, relax, and evaluate a model TOFPlanet."""
     # Parameter vector x may or may not include a rotation parameter
-    if args.fix_mrot:
+    if args.fix_rot:
         mrot = obs.m
+        Prot = obs.P
         xx = x
     else:
         mrot = x[0]
+        Prot = 2*np.pi/np.sqrt(mrot*obs.GM/obs.S0**3)
         xx = x[1:]
 
     # Evaluate prior on sample-space parameters
@@ -88,20 +86,24 @@ def _lnprob(x,obs,args):
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
     if (P > generic_priors._unlikely()) and (not args.fakelike):
-        Js, out = tof(svec, dvec, mrot,
-                      xlevels=args.xlevels,
-                      calc_moi=args.with_moi)
-        svec = svec*obs.a0/(svec[0]*out.a0)
-        if args.fix_mass:
-            m = ah.mass_integral(svec,dvec)
-            dvec = dvec*obs.M/m
+        obs.P = Prot
+        obs.m = mrot
+        tp = TOFPlanet.TOFPlanet(obs,**args.__dict__)
+        tp.si = svec
+        tp.rhoi = dvec
+        if args.preserve_period:
+            tp.relax_to_rotation()
+        else:
+            tp.relax_to_HE(fixmass=args.fix_mass,moi=args.with_moi)
+        svec, dvec = tp.si, tp.rhoi
+        Js = tp.Js
 
         jflag = args.Jays[args.Jays > 0]
         dsqr = (losses.mass((svec,dvec),obs)**2 +
                 losses.rho0((svec,dvec),obs)**2 +
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
-            dsqr += losses.NMoI(out.NMoI, obs)**2
+            dsqr += losses.NMoI(tp.NMoI, obs)**2
         if args.with_k2:
             dsqr += losses.k2((svec, dvec), obs)**2
     return -0.5*(dsqr/args.temperature) + P
@@ -154,6 +156,7 @@ def _main(spool,args):
         raise ValueError(
                 "Could not determine target planet; check command line.")
     if args.no_spin: # Sometimes (rarely) we want to stop rotation
+        obs.P = np.inf
         obs.m = 0.0
         obs.a0 = obs.s0
 
@@ -329,11 +332,14 @@ def _PCL():
     mdlgroup.add_argument('--fix-mass', type=int, default=1,
         help="Normalize converged model mass to obs.M")
 
-    mdlgroup.add_argument('--fix-mrot', type=int, default=1,
-        help="Don't sample rotation parameter (use obs.m instead)")
+    mdlgroup.add_argument('--fix-rot', type=int, default=1,
+        help="Don't sample rotation period (use obs.P instead)")
+
+    mdlgroup.add_argument('--preserve-period', type=int, default=1,
+        help="Iterate on rotation m until rotation period matched obs.P.")
 
     mdlgroup.add_argument('--no-spin', action='store_true',
-        help="Make spherical planet (sets obs.m to zero)")
+        help="Make spherical planet (sets obs.P to inf)")
 
     tofgroup = parser.add_argument_group('TOF options',
         'Options controlling ToF gravity calculation')
@@ -381,7 +387,7 @@ def _PCL():
         args.serialize = True
     if args.no_spin:
         args.Jays = np.array([0])
-        args.fix_mrot = 1
+        args.fix_rot = 1
 
     return args
 

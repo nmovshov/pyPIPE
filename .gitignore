@@ -2,6 +2,8 @@
 *~
 *.asv
 *.swp
+uranus/samples/fixedrho0
+uranus/samples/fixedmass
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -239,6 +239,7 @@ methods(Static)
 
     function a = quadratic_planet(M, R, rho0)
         % Return a s.t. rho(r) = a*(r/R)^2 - a integrates to M.
+        if nargin < 3, rho0 = 0; end
         a = 5/2*rho0 - 15*M/8/pi/R^3;
     end
 

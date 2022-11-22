@@ -22,18 +22,20 @@ def cook_planet(x, obs, opts):
     """Create a planet object from sample-space parameters."""
     y = the_transform(x, obs)
     svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
-    p = TOFPlanet.TOFPlanet(obs)
-    p.si = svec*obs.s0
-    p.rhoi = dvec
-    p.opts['toforder'] = opts.toforder
-    p.opts['xlevels'] = opts.xlevels
-    if not opts.no_spin:
-        p.relax_to_HE(fixradius=True, fixmass=opts.fix_mass,
-                      moi=opts.with_moi,
-                      pressure=opts.with_pressure)
+    tp = TOFPlanet.TOFPlanet(obs)
+    tp.si = svec*obs.s0
+    tp.rhoi = dvec
+    tp.opts['toforder'] = opts.toforder
+    tp.opts['xlevels'] = opts.xlevels
+    if opts.no_spin:
+        tp.period = np.inf
+    if opts.preserve_period:
+        tp.relax_to_rotation()
+    tp.relax_to_HE(fixmass=opts.fix_mass,moi=True,pressure=True)
+
     if opts.with_k2:
-        p.k2 = ah.lovek2(p.si, p.rhoi)
-    return p
+        tp.k2 = ah.lovek2(tp.si, tp.rhoi)
+    return tp
 
 def _PCL():
     # Return struct with command line arguments as fields.
@@ -58,11 +60,14 @@ def _PCL():
     mdlgroup.add_argument('--fix-mass', type=int, default=1,
         help="Normalize converged model mass to obs.M")
 
-    mdlgroup.add_argument('--fix-mrot', type=int, default=1,
-        help="Don't sample rotation parameter (use obs.m instead)")
+    mdlgroup.add_argument('--fix-rot', type=int, default=1,
+        help="Don't sample rotation period (use obs.P instead)")
+
+    mdlgroup.add_argument('--preserve-period', type=int, default=1,
+        help="Iterate on rotation m until rotation period matched obs.P.")
 
     mdlgroup.add_argument('--no-spin', action='store_true',
-        help="Make spherical planet (sets obs.m to zero)")
+        help="Make spherical planet (sets obs.P to inf)")
 
     mdlgroup.add_argument('--with-k2', action='store_true',
         help="Include tidal k2 calculation")
@@ -78,12 +83,6 @@ def _PCL():
 
     tofgroup.add_argument('--xlevels', type=int, default=256,
         help="Skip-n-spline levels")
-
-    tofgroup.add_argument('-m','--with-moi', type=int, default=1,
-        help="Include MoI calculation")
-
-    tofgroup.add_argument('-P','--with-pressure', type=int, default=1,
-        help="Include pressure calculation")
 
     swimgroup = parser.add_argument_group('Parallel execution option')
 
