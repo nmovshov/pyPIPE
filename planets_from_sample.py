@@ -35,6 +35,9 @@ def cook_planet(x, obs, opts):
 
     if opts.with_k2:
         tp.k2 = ah.lovek2(tp.si, tp.rhoi)
+    if not opts.savess:
+        tp.ss = None
+        tp.SS = None
     return tp
 
 def _PCL():
@@ -83,6 +86,9 @@ def _PCL():
 
     tofgroup.add_argument('--xlevels', type=int, default=256,
         help="Skip-n-spline levels")
+
+    tofgroup.add_argument('--savess', action='store_true',
+        help="Retain full shape information (triples file size)")
 
     swimgroup = parser.add_argument_group('Parallel execution option')
 
