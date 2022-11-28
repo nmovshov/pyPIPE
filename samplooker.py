@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ppwd
 import TOFPlanet
+import ahelpers as ah
 
 def load_planets(fname):
     with open(fname, 'rb') as f:
@@ -199,6 +200,22 @@ def plot_profile(s, rho, newfig=False, **kwargs):
     # Style, annotate, and show
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.show(block=False)
+
+def hist_loss(fname,obs,Jmax,newfig=False,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname)
+    L = ah.lossify_planets(planets,obs,Jmax)
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot the histogram
+    plt.hist(L, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel('Loss function value')
+    plt.yticks([])
     plt.show(block=False)
 
 def hist_mass_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):

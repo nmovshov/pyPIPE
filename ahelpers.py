@@ -7,6 +7,19 @@ import numpy as np
 from scipy.stats import norm, chi2
 cout = sys.stdout.write
 
+def lossify_planets(planets, obs, Jmax, rho0=True, mass=False):
+    import losses
+    J_ord = [2*n for n in range(1,int(Jmax/2)+1)]
+    L = []
+    for p in planets:
+        el = losses.euclid_Jnm(p.Js, obs, J_ord)
+        if rho0:
+            el = np.sqrt(el**2 + losses.rho0((p.si,p.rhoi),obs)**2)
+        if mass:
+            el = np.sqrt(el**2 + losses.mass((p.si,p.rhoi),obs)**2)
+        L.append(el)
+    return np.array(L)
+
 def load_planets(fname):
     import pickle
     import TOFPlanet
@@ -31,6 +44,10 @@ def density_prctiles(profs, prcs):
 def _sig2mahal(sig,p):
     """Return Mahalanobis distance in p dims equivalent to Z-score sig."""
     return np.sqrt(chi2.ppf(norm.cdf(sig) - norm.cdf(-sig), p))
+
+def _mahal2sig(d, p):
+    """Return z-score equivalent of Mahalanobis distance d in p dims."""
+    return -norm.ppf((1 - chi2.cdf(d**2,p))/2)
 
 def winners(C,L,df,prior,sig=2.5):
     """Find walkers with endstate likelihood above sigma-equivalent."""
