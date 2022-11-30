@@ -56,23 +56,6 @@ def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J2(fname, newfig=False, bins='auto', density=True, **kwargs):
-    # Prepare the data
-    planets = load_planets(fname)
-    J2 = 1e6*np.array([p.Js[1] for p in planets])
-
-    # Prepare the canvas
-    _get_canvas(newfig)
-
-    # Plot the histogram
-    plt.hist(J2, bins=bins, density=density, **kwargs)
-
-    # Style, annotate, and show
-    plt.xlabel(r'$J_2\times{10^6}$')
-    # plt.xlim(J2.mean()-2*J2.std(), J2.mean()+2*J2.std())
-    plt.yticks([])
-    plt.show(block=False)
-
 def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname)
@@ -235,10 +218,27 @@ def hist_mass_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J2_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
+def hist_J(fname, n, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
-    J_err = (np.array([p.Js[1] for p in planets]) - obs.J2)/obs.dJ2
+    planets = load_planets(fname) if type(fname) is str else fname
+    J = 1e6*np.array([p.Js[n//2] for p in planets])
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot the histogram
+    plt.hist(J, bins=bins, density=density, **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(f'$J_{n}$X$10^6$')
+    plt.yticks([])
+    plt.show(block=False)
+
+def hist_J_err(fname,n,obs,newfig=False,bins='auto',density=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname) if type(fname) is str else fname
+    J = np.array([p.Js[n//2] for p in planets])
+    J_err = 1e6*(J - obs.Js[n//2])
 
     # Prepare the canvas
     _get_canvas(newfig)
@@ -247,7 +247,7 @@ def hist_J2_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     plt.hist(J_err, bins=bins, density=density, **kwargs)
 
     # Style, annotate, and show
-    plt.xlabel(r'$(J_2-J_2^\mathrm{obs})/\sigma{J_2}^\mathrm{obs}$')
+    plt.xlabel(f'$(J_{n}-J_{n}^*)$X$10^6$')
     # plt.xlim(M.mean()-2*M.std(),M.mean()+2*M.std())
     plt.yticks([])
     plt.show(block=False)

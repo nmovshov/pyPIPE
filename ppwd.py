@@ -13,7 +13,6 @@ def ppwd_planet(N, x, obs, toforder=4, xlevels=-1):
     p.rhoi = dvec
     p.opts['toforder'] = toforder
     p.opts['xlevels'] = xlevels
-    p.relax_to_HE(fixradius=True, moi=True, pressure=True)
     return p
 
 def ppwd_profile(N, x, rho0, zvec=None, forcemono=True):
