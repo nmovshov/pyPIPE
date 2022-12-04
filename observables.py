@@ -255,7 +255,7 @@ class Saturn:
         self.dJs = np.array(
                 (0,self.dJ2,self.dJ4,self.dJ6,self.dJ8,self.dJ10,self.dJ12,self.dJ14))
 
-class Saturn_tof4(Saturn):
+class Saturn4(Saturn):
     """Modify gravity uncertainties to tof4 truncation error."""
     dJ2  = 1e-4*np.abs(Saturn.J2)
     dJ4  = 3e-3*np.abs(Saturn.J4)
@@ -266,7 +266,7 @@ class Saturn_tof4(Saturn):
     dJ14 = np.inf
     dJs = np.array((0, dJ2, dJ4, dJ6, dJ8, dJ10, dJ12, dJ14))
 
-class Saturn_winds(Saturn):
+class Saturn9(Saturn):
     """Gravity uncertainties reflecting potential deep wind contribution.
 
     See fig. 4 in Galanti, E., & Kaspi, Y. (2017). The Astrophysical Journal,
