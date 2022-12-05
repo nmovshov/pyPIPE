@@ -4,6 +4,7 @@
 *.swp
 uranus/samples/fixedrho0
 uranus/samples/fixedmass
+TODO.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
