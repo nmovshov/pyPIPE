@@ -195,7 +195,7 @@ class Saturn:
     m = w**2*s0**3/GM
 
     # Sometimes we use an estimate of roation period uncertainty
-    dP = 60 # A 2-sigma ~= 1-minute spread of modern estimates
+    dP = 55 # A 2-sigma ~= 1-minute spread of modern estimates
     dw = 2*np.pi/P**2*dP
     dq = 2*w*a0**3/GM*dw
     dm = 2*w*s0**3/GM*dw
