@@ -255,6 +255,17 @@ class Saturn:
         self.dJs = np.array(
                 (0,self.dJ2,self.dJ4,self.dJ6,self.dJ8,self.dJ10,self.dJ12,self.dJ14))
 
+class Saturn1(Saturn):
+    """Slightly relaxed gravity uncertainties, rounded up in oom."""
+    dJ2  = 1e-7
+    dJ4  = 1e-7
+    dJ6  = 1e-7
+    dJ8  = np.inf
+    dJ10 = np.inf
+    dJ12 = np.inf
+    dJ14 = np.inf
+    dJs = np.array((0, dJ2, dJ4, dJ6, dJ8, dJ10, dJ12, dJ14))
+
 class Saturn4(Saturn):
     """Modify gravity uncertainties to tof4 truncation error."""
     dJ2  = 1e-4*np.abs(Saturn.J2)
