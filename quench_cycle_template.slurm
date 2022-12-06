@@ -23,25 +23,25 @@ do
 tic=$SECONDS
 rm -rf $rundir
 
-python drive-ppwd.py "$seedfile" 10 $obs -w=72 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e3
+python drive-ppwd.py "$seedfile" 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e3 >> rlog.$SLURM_JOB_ID.log
 
-python reseed.py "$rundir"/final.npz
+python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 10 $obs -w=72 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e2
+python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e2 >> rlog.$SLURM_JOB_ID.log
 
-python reseed.py "$rundir"/final.npz
+python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 10 $obs -w=72 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e1
+python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e1 >> rlog.$SLURM_JOB_ID.log
 
-python reseed.py "$rundir"/final.npz
+python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 100 $obs -w=72 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e0
+python drive-ppwd.py fromreseed 100 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e0 >> rlog.$SLURM_JOB_ID.log
 
-python save_ppwd_winners.py "$rundir"/final.npz "$prefix"_wins.txt $dof $seedfile
+python save_ppwd_winners.py "$rundir"/final.npz wins_"$prefix".txt $dof $seedfile >> rlog.$SLURM_JOB_ID.log
 
 toc=$SECONDS
-echo "Elapsed time $((toc-tic)) seconds."
+echo "Elapsed time $((toc-tic)) seconds." >> rlog.$SLURM_JOB_ID.log
 
 done
 rtoc=$SECONDS
-echo "Total runtime $(((rtoc-rtic)/3600)) hours."
+echo "Total runtime $(((rtoc-rtic)/3600)) hours." >> rlog.$SLURM_JOB_ID.log
