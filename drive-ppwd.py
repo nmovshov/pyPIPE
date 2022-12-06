@@ -67,7 +67,7 @@ def _lnprob(x,obs,args):
         Prot = obs.P
         xx = x
     else:
-        mrot = x[0]
+        mrot = x[0]*obs.dm/2 + obs.m
         Prot = 2*np.pi/np.sqrt(mrot*obs.GM/obs.S0**3)
         xx = x[1:]
 

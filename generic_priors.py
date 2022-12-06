@@ -54,10 +54,10 @@ def rotation_prior(mrot,obs):
     """A prior on rotation parameter m=w^2s0^3/GM."""
     mu = obs.m
     sig = obs.dm/2
-    return -(mrot - mu)**2/(2*sig**2)
+    return -0.5*(mrot - mu)**2/(sig**2)
 
 def rho0_prior(rho0,obs):
     """A prior on the 1-bar density."""
     mu = obs.rho0
     sig = obs.drho0/2
-    return -(rho0 - mu)**2/(2*sig**2)
+    return -0.5*(rho0 - mu)**2/(sig**2)
