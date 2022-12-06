@@ -68,7 +68,7 @@ def _lnprob(x,obs,args):
         xx = x
     else:
         mrot = x[0]*obs.dm/2 + obs.m
-        Prot = 2*np.pi/np.sqrt(mrot*obs.GM/obs.S0**3)
+        Prot = 2*np.pi/np.sqrt(mrot*obs.GM/obs.s0**3)
         xx = x[1:]
 
     # Evaluate prior on sample-space parameters
