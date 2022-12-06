@@ -23,7 +23,7 @@ if Z.ndim == 1:
     Z = Z.reshape((1,-1))
 print("Z.shape = ", Z.shape)
 
-if seedfile:
+if seedfile and Z.size:
     S = np.loadtxt(seedfile)
     fakers = []
     for z in Z:
