@@ -61,18 +61,16 @@ the_transform = ppwd.ppwd_transform
 
 def _lnprob(x,obs,args):
     """Generate, relax, and evaluate a model TOFPlanet."""
-    # Parameter vector x may or may not include a rotation parameter
+    # Parameter vector x may or may not include (standardized) rotation period
     if args.fix_rot:
-        mrot = obs.m
         Prot = obs.P
         xx = x
     else:
-        mrot = x[0]*obs.dm/2 + obs.m
-        Prot = 2*np.pi/np.sqrt(mrot*obs.GM/obs.s0**3)
+        Prot = x[0]*obs.dP/2 + obs.P
         xx = x[1:]
 
     # Evaluate prior on sample-space parameters
-    P = (the_prior(xx, obs) + generic_priors.rotation_prior(mrot, obs))
+    P = (the_prior(xx, obs) + generic_priors.rotation_prior(Prot, obs))
 
     # Transform from sample space to model space and create the density profile
     y = the_transform(xx, obs)
@@ -87,7 +85,6 @@ def _lnprob(x,obs,args):
     dsqr = 0
     if (P > generic_priors._unlikely()) and (not args.fakelike):
         obs.P = Prot
-        obs.m = mrot
         tp = TOFPlanet.TOFPlanet(obs,**args.__dict__)
         tp.si = svec
         tp.rhoi = dvec

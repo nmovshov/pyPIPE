@@ -39,17 +39,20 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
+def hist_moi(fname,rol=False,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
     ice = np.array([p.NMoI for p in planets])
-    mu, sig = ice.mean(), ice.std
+    mu, sig = ice.mean(), ice.std()
+    if rol:
+        ice = ice[np.abs(ice - mu) < 3*sig]
 
     # Prepare the canvas
     _get_canvas(newfig)
 
     # Plot the histogram
-    plt.hist(ice,bins=bins,density=density,label=f"${mu:.4f}$",**kwargs)
+    plt.hist(ice,bins=bins,density=density,**kwargs)
+    plt.vlines(mu, *plt.ylim(), ls='--', color='r', label=f"{mu:.4f}")
 
     # Style, annotate, and show
     plt.xlabel(r'Normalized moment of inertia, $I/Ma_0^2$')

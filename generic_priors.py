@@ -50,11 +50,11 @@ def gasplanet(dvec, obs, flipum=False):
             nonincreasing_density(dvec,flipum) +
             max_density(dvec,obs,flipum))
 
-def rotation_prior(mrot,obs):
-    """A prior on rotation parameter m=w^2s0^3/GM."""
-    mu = obs.m
-    sig = obs.dm/2
-    return -0.5*(mrot - mu)**2/(sig**2)
+def rotation_prior(Prot,obs):
+    """A prior on rotation period."""
+    mu = obs.P
+    sig = obs.dP/2
+    return -0.5*(Prot - mu)**2/(sig**2)
 
 def rho0_prior(rho0,obs):
     """A prior on the 1-bar density."""
