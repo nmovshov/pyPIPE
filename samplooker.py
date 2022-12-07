@@ -41,19 +41,20 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
 
 def hist_moi(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     ice = np.array([p.NMoI for p in planets])
+    mu, sig = ice.mean(), ice.std
 
     # Prepare the canvas
     _get_canvas(newfig)
 
     # Plot the histogram
-    plt.hist(ice, bins=bins, density=density, **kwargs)
+    plt.hist(ice,bins=bins,density=density,label=f"${mu:.4f}$",**kwargs)
 
     # Style, annotate, and show
     plt.xlabel(r'Normalized moment of inertia, $I/Ma_0^2$')
-    # plt.xlim(ice.mean()-2*ice.std(),ice.mean()+2*ice.std())
     plt.yticks([])
+    plt.legend()
     plt.show(block=False)
 
 def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
@@ -74,7 +75,7 @@ def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
 
 def hist_rho0(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     r0s = np.array([p.rhoi[0] for p in planets])
 
     # Prepare the canvas
@@ -187,7 +188,7 @@ def plot_profile(s, rho, newfig=False, **kwargs):
 
 def hist_loss(fname,obs,Jmax,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     L = ah.lossify_planets(planets,obs,Jmax)
 
     # Prepare the canvas
@@ -254,7 +255,7 @@ def hist_J_err(fname,n,obs,newfig=False,bins='auto',density=True,**kwargs):
 
 def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     s0 = np.array([p.s0 for p in planets])
     mrot = np.array([p.mrot for p in planets])
     GM = np.array([p.GM for p in planets])
