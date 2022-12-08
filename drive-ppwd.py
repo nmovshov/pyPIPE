@@ -71,6 +71,8 @@ def _lnprob(x,obs,args):
 
     # Evaluate prior on sample-space parameters
     P = (the_prior(xx, obs) + generic_priors.rotation_prior(Prot, obs))
+    if P == -np.inf:
+        return P
 
     # Transform from sample space to model space and create the density profile
     y = the_transform(xx, obs)
