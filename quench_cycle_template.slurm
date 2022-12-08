@@ -15,29 +15,31 @@ prefix=cycle1
 rundir="$prefix"_saturn_run
 seedfile=saturn/samples/deg4_tof4_J4_obs0_PF.txt
 obs=Saturn1
+Js="2"
 dof=3
-rtic=$SECONDS
+fixrot=0
 
+rtic=$SECONDS
 for i in {1..1}
 do
 tic=$SECONDS
 rm -rf $rundir
 
-python drive-ppwd.py "$seedfile" 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e3 >> rlog.$SLURM_JOB_ID.log
+python drive-ppwd.py "$seedfile" 10 $obs -w=160 --ncores=40 -j $Js --toforder=4 --prefix="$prefix" -T=1e3 --fix-rot=$fixrot >> rlog.$SLURM_JOB_ID.log
 
 python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e2 >> rlog.$SLURM_JOB_ID.log
+python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j $Js --toforder=4 --prefix="$prefix" -T=1e2 --fix-rot=$fixrot >> rlog.$SLURM_JOB_ID.log
 
 python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e1 >> rlog.$SLURM_JOB_ID.log
+python drive-ppwd.py fromreseed 10 $obs -w=160 --ncores=40 -j $Js --toforder=4 --prefix="$prefix" -T=1e1 --fix-rot=$fixrot >> rlog.$SLURM_JOB_ID.log
 
 python reseed.py "$rundir"/final.npz >> rlog.$SLURM_JOB_ID.log
 
-python drive-ppwd.py fromreseed 100 $obs -w=160 --ncores=40 -j 2 4 --toforder=4 --prefix="$prefix" -T=1e0 >> rlog.$SLURM_JOB_ID.log
+python drive-ppwd.py fromreseed 100 $obs -w=160 --ncores=40 -j $Js --toforder=4 --prefix="$prefix" -T=1e0 --fix-rot=$fixrot >> rlog.$SLURM_JOB_ID.log
 
-python save_ppwd_winners.py "$rundir"/final.npz wins_"$prefix".txt $dof $seedfile >> rlog.$SLURM_JOB_ID.log
+python save_ppwd_winners.py "$rundir"/final.npz wins_"$prefix".txt $dof $fixrot $seedfile >> rlog.$SLURM_JOB_ID.log
 
 toc=$SECONDS
 echo "Elapsed time $((toc-tic)) seconds." >> rlog.$SLURM_JOB_ID.log
