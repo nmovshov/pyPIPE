@@ -2,7 +2,8 @@
 
 import sys, os
 import numpy as np
-import matplotlib.pyplot as plt
+if sys.platform == 'win32':
+    import matplotlib.pyplot as plt
 
 sys.path.append(os.getcwd())
 
@@ -11,4 +12,5 @@ import ppwd
 import TOFPlanet
 import ahelpers as ah
 import losses
-import samplooker as spl
+if sys.platform == 'win32':
+    import samplooker as spl

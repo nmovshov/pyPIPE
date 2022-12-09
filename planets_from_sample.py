@@ -133,7 +133,14 @@ def _main(spool,args):
         if (args.ncores == 1) and (args.verbosity > 0):
             print(f"cooking planet {k+1} of {nsamp}...",end='')
         s = sample[k]
-        p = cook_planet(s,obs,args)
+        if args.fix_rot:
+            Prot = obs.P
+            sx = s
+        else:
+            Prot = s[0]*obs.dP/2 + obs.P
+            sx = s[1:]
+        obs.P = Prot
+        p = cook_planet(sx,obs,args)
         planets.append(p)
         if (args.ncores == 1) and (args.verbosity > 0):
             print("done.")
