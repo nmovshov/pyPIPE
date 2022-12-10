@@ -58,9 +58,6 @@ class TOFPlanet:
         self.P0 = obs.P0
         self.period = obs.P
         self.GM = self.G*self.mass
-        self.wrot = 2*np.pi/self.period
-        self.qrot = self.wrot**2*self.radius**3/self.GM
-        self.mrot = self.wrot**2*self.s0**3/self.GM
         self.rhobar = self.mass/(4*np.pi/3*self.s0**3)
 
     def relax_to_rotation(self):
@@ -69,6 +66,9 @@ class TOFPlanet:
         self.Js = np.hstack((-1, np.zeros(self.opts['toforder'])))
         self.opts['MaxIterHE'] = 3 # optimal from token benchmark
         self.opts['verbosity'] = 0 # silence HE warnings
+
+        self.wrot = 2*np.pi/self.period
+        self.mrot = self.wrot**2*self.s0**3/self.GM
         it = 1
         while it < self.opts['MaxIterRot']:
             it = it + 1
@@ -141,12 +141,26 @@ class TOFPlanet:
                 P[k+1] = P[k] + 0.5*(r[k] - r[k+1])*(intgrnd[k] + intgrnd[k+1])
             self.Pi = P
 
+    def level_surfaces(self,mus):
+        # Normalized r(cos(theta)) from shape functions
+        ss = self.ss
+        s0 = ss[0]; s2 = ss[1]; s4 = ss[2]; s6 = ss[3]; s8 = ss[4]
+        shp = (np.outer(s0,_Pn(0,mus)) + np.outer(s2,_Pn(2,mus)) +
+               np.outer(s4,_Pn(4,mus)) + np.outer(s6,_Pn(6,mus)) +
+               np.outer(s8,_Pn(8,mus)))
+        return np.flipud(1 + shp)
+
     ### Private methods slash pseudo properties
     def _m2P(self):
         return 2*np.pi/(np.sqrt(self.mrot*(self.G*self.M)/self.s0**3))
 
     def _P2m(self):
         return (2*np.pi/self.period)**2*self.s0**3/(self.G*self.M)
+
+    def ai(self):
+        return self.s0*self.level_surfaces(0) # level surfaces equatorial radii
+    def bi(self):
+        return self.s0*self.level_surfaces(1) # level surfaces polar radii
 
     ### Visualizers
     def plot_rho_of_r(self):
@@ -207,8 +221,6 @@ class TOFPlanet:
             fid.write(f'# Mean radius       s0 = {self.s0:0.6e} m\n')
             fid.write(f'# Equatorial radius a0 = {self.a0:0.6e} m\n')
             fid.write(f'# Rotation period P = {self.period:0.6g} s\n')
-            fid.write(f'# Rotation parameter m = {self.mrot:0.6f}\n')
-            fid.write(f'# Rotation parameter q = {self.qrot:0.6f}\n')
             fid.write(f'# Normalized MOI = {self.NMoI:0.6f}\n')
             fid.write(f'#\n')
             fid.write(f'# Calculated gravity zonal harmonics (x 10^6):\n')
@@ -239,6 +251,23 @@ class TOFPlanet:
                 fid.write(f'{self.Pi[k]:10.4e}  ')
                 fid.write(f'\n')
         return
+
+# Class-related functions
+def _Pn(n, x):
+    # Fast implementation of ordinary Legendre polynomials of low even degree.
+    if n == 0:
+        y = np.ones_like(x)
+    elif n == 2:
+        y = 0.5*(3*x**2 - 1)
+    elif n == 4:
+        y = (1/8)*(35*x**4 - 30*x**2 + 3)
+    elif n == 6:
+        y = (1/16)*(231*x**6 - 315*x**4 + 105*x**2 - 5)
+    elif n == 8:
+        y = (1/128)*(6435*x**8 - 12012*x**6 + 6930*x**4 - 1260*x**2 + 35)
+    else:
+        raise(Exception("Unimplemented order"))
+    return y
 
 def _mass_int(svec, dvec):
     """Trapz-integrate mass from rho(r) data."""

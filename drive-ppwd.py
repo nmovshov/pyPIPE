@@ -86,10 +86,10 @@ def _lnprob(x,obs,args):
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
     if (P > generic_priors._unlikely()) and (not args.fakelike):
-        obs.P = Prot
         tp = TOFPlanet.TOFPlanet(obs,**args.__dict__)
         tp.si = svec
         tp.rhoi = dvec
+        tp.period = Prot
         if args.preserve_period:
             tp.relax_to_rotation()
         else:
@@ -100,7 +100,6 @@ def _lnprob(x,obs,args):
         jflag = args.Jays[args.Jays > 0]
         dsqr = (losses.mass((svec,dvec),obs)**2 +
                 losses.rho0((svec,dvec),obs)**2 +
-                losses.period(tp._m2P(),obs)**2 +
                 losses.euclid_Jnm(Js,obs,jflag)**2)
         if args.with_moi:
             dsqr += losses.NMoI(tp.NMoI, obs)**2

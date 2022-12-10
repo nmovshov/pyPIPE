@@ -20,11 +20,18 @@ the_transform = ppwd.ppwd_transform
 
 def cook_planet(x, obs, opts):
     """Create a planet object from sample-space parameters."""
+    if opts.fix_rot:
+        Prot = obs.P
+        x = x
+    else:
+        Prot = x[0]*obs.dP/2 + obs.P
+        x = x[1:]
     y = the_transform(x, obs)
     svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
     tp = TOFPlanet.TOFPlanet(obs)
     tp.si = svec*obs.s0
     tp.rhoi = dvec
+    tp.period = Prot
     tp.opts['toforder'] = opts.toforder
     tp.opts['xlevels'] = opts.xlevels
     if opts.no_spin:
@@ -133,14 +140,7 @@ def _main(spool,args):
         if (args.ncores == 1) and (args.verbosity > 0):
             print(f"cooking planet {k+1} of {nsamp}...",end='')
         s = sample[k]
-        if args.fix_rot:
-            Prot = obs.P
-            sx = s
-        else:
-            Prot = s[0]*obs.dP/2 + obs.P
-            sx = s[1:]
-        obs.P = Prot
-        p = cook_planet(sx,obs,args)
+        p = cook_planet(s,obs,args)
         planets.append(p)
         if (args.ncores == 1) and (args.verbosity > 0):
             print("done.")
