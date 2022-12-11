@@ -1,6 +1,18 @@
 classdef ppwd
 %% Methods for working with the PPWD density parameterization
 methods(Static)
+    function p = ppwd_planet(N,x,obs)
+        %PPWD_PLANET Create a TOFPlanet object from sample-space parameters.
+        %   p = PPWD_PLANET(N,x,obs) returns a TOFPlanet object initialized
+        %   with observables obs and with N-level density ppwd_profile derived
+        %   from sample-space parameters x.
+        y = ppwd.ppwd_transform(x,obs);
+        [zvec,dvec] = ppwd.ppwd_profile(N,y,obs.rho0);
+        p = TOFPlanet(obs);
+        p.si = zvec*obs.s0;
+        p.rhoi = dvec;
+    end
+
     function [zvec,dvec] = ppwd_profile(N,x,rho0,zvec,forcemono)
         %PPWD_PROFILE Polynomial plus two smoothed step functions.
         %    [zvec,dvec] = PPWD_PROFILE(N, x, rho0) returns an N-point density
@@ -246,7 +258,7 @@ methods(Static)
     function s = supports(obs)
         if nargin < 1, obs = []; end
         s.z1 = [0.05, 0.5];
-        s.z2 = [0., 0.85];
+        s.z2 = [0.5, 0.85];
         s.dro1 = [0, 3e4];
         s.dro2 = [0, 3e4];
         s.s1 = [20,1001];

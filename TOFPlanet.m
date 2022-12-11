@@ -93,12 +93,12 @@ classdef TOFPlanet < handle
             
             % Set reference values from obs (or undocumented default planet)
             if nargin == 0 % prefill critical fields with reasonable values
-                obs.pname = 'planet'
-                obs.M  = 1898.187e24
-                obs.a0 = 71492e3
-                obs.s0 = 69911e3
-                obs.P0 = 1e5
-                obs.P = 0.41354*24*3600
+                obs.pname = 'planet';
+                obs.M  = 1898.187e24;
+                obs.a0 = 71492e3;
+                obs.s0 = 69911e3;
+                obs.P0 = 1e5;
+                obs.P = 0.41354*24*3600;
             end
             obj.set_observables(obs);
             % Populate options struct
@@ -107,7 +107,7 @@ classdef TOFPlanet < handle
             % Init privates
             obj.aos = 1;
             obj.G = 6.67430e-11; % m^3 kg^-1 s^-2 (2018 NIST reference)
-            obj.GM = obj.G*obj.mass
+            obj.GM = obj.G*obj.mass;
         end
     end % End of constructor block
     
@@ -115,7 +115,7 @@ classdef TOFPlanet < handle
     methods (Access = public)
         function obj = set_observables(obj, obs)
             % Copy physical properties from an +observables struct.
-            obj.name = obs.pname
+            obj.name = obs.pname;
             obj.mass = obs.M;
             obj.radius = obs.a0;
             obj.period = obs.P;
@@ -151,7 +151,7 @@ classdef TOFPlanet < handle
             % Ready, set,...
             warning('off','TOF4:maxiter')
             warning('off','TOF7:maxiter')
-            obj.opts.MaxIterHE = 3 % optimal from token benchmark
+            obj.opts.MaxIterHE = 3; % optimal from token benchmark
             if obj.opts.toforder == 4
                 tofun = @tof4;
             else

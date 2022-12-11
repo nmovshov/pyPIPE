@@ -224,7 +224,7 @@ methods (Static)
         obs.rhomax = 20000;        % ANEOS serpentine at 50 Mbar is ~15000
 
         % Nominal rotation rate e.g. Mankovich (2019)
-        obs.P = 38014 % 10 hours 33 minutes 34 seconds
+        obs.P = 38014; % 10 hours 33 minutes 34 seconds
         obs.w = 2*pi/obs.P;
         obs.GM = obs.G*obs.M;
         obs.q = obs.w^2*obs.a0^3/obs.GM;
