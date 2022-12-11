@@ -11,7 +11,7 @@ for the default, best-available data, or:
     from observables import <planet_name>_<mod_source>
 
 for values and/or uncertainties modified to suit some purpose. For example,
-observables.Saturn_tof4() modifies (increases) the gravity uncertainties to
+observables.Saturn4() modifies (increases) the gravity uncertainties to
 match the estimated truncation error of 4th-order ToF.
 
 The returned struct has the following fields:

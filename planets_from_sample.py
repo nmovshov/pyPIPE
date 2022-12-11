@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Script to convert a sample to list of ppwd profiles.
+# Script to convert a ppwd-sample to list of TOFPlanets.
 #------------------------------------------------------------------------------
 import sys, os
 import pickle

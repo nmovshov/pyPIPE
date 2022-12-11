@@ -11,7 +11,7 @@ classdef observables
 %   obs = observables.<planet_name>_<mod_source>()
 %
 % for values and/or uncertainties modified to suit some purpose. For example,
-% observables.Saturn_tof4() modifies (increases) the gravity uncertainties to
+% observables.Saturn4() modifies (increases) the gravity uncertainties to
 % match the estimated truncation error of 4th-order ToF.
 %
 % The returned struct has the following fields:
@@ -223,13 +223,15 @@ methods (Static)
         obs.drho0 = 0.0057;        % half the range of T0+/-dT0
         obs.rhomax = 20000;        % ANEOS serpentine at 50 Mbar is ~15000
 
-        % Rotation rate, Mankovich (2019) rounded to the minute
-        obs.P = 38040; % 10 hours 34 minutes
+        % Nominal rotation rate e.g. Mankovich (2019)
+        obs.P = 38014; % 10 hours 33 minutes 34 seconds
         obs.w = 2*pi/obs.P;
         obs.GM = obs.G*obs.M;
         obs.q = obs.w^2*obs.a0^3/obs.GM;
         obs.m = obs.w^2*obs.s0^3/obs.GM;
-        obs.dP = 120; % A 2-sigma ~= 2-minute spread of modern estimates
+
+        % Sometimes we use an estimate of roation period uncertainty
+        obs.dP = 55; % A 2-sigma ~= 1-minute spread of modern estimates
         obs.dw = 2*pi/obs.P^2*obs.dP;
         obs.dq = 2*obs.w*obs.a0^3/obs.GM*obs.dw;
         obs.dm = 2*obs.w*obs.s0^3/obs.GM*obs.dw;
@@ -263,7 +265,21 @@ methods (Static)
                      obs.dJ10,obs.dJ12,obs.dJ14];
     end
 
-    function obs = Saturn_tof4()
+    function obs = Saturn1()
+        % Slightly relaxed gravity uncertainties, rounded up in oom..
+        obs = observables.Saturn();
+        obs.dJ2  = 1e-7;
+        obs.dJ4  = 1e-7;
+        obs.dJ6  = 1e-7;
+        obs.dJ8  = inf;
+        obs.dJ10 = inf;
+        obs.dJ12 = inf;
+        obs.dJ14 = inf;
+        obs.dJs = [0, obs.dJ2, obs.dJ4, obs.dJ6, obs.dJ8,...
+                      obs.dJ10, obs.dJ12, obs.dJ14];
+    end
+
+    function obs = Saturn4()
         % Modify gravity uncertainties to tof4 truncation error.
         obs = observables.Saturn();
         obs.dJ2  = 1e-4*abs(obs.J2);
@@ -277,7 +293,7 @@ methods (Static)
                       obs.dJ10, obs.dJ12, obs.dJ14];
     end
 
-    function obs = Saturn_winds()
+    function obs = Saturn9()
         % Gravity uncertainties reflecting potential deep wind contribution.
         %
         % See fig. 4 in Galanti, E., & Kaspi, Y. (2017). The Astrophysical
