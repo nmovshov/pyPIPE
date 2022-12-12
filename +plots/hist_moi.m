@@ -37,12 +37,14 @@ if isempty(pr.nbins)
 else
     lh = histogram(ice, pr.nbins, 'Normalization', pr.norm);
 end
+if ~isempty(pr.label)
+    lh.DisplayName = pr.label;
+end
 if pr.showmu
-    h = vline(mu,'r--');
-    h.DisplayName = sprintf('%.4f',mu);
+    vline(mu,'r--');
 end
 
-%% Style and annotate axes
+%% Style and annotate
 if isempty(pr.axes)
     xlabel('Normalized moment of inertia, $I/Ma_0^2$')
     ah.XLim = [min(ice), max(ice)];
@@ -53,6 +55,9 @@ if isempty(pr.axes)
     ah.YTickLabel = [];
     if ~isempty(pr.title)
         title(pr.title)
+    end
+    if pr.legend
+        legend(location='nw');
     end
 end
 end
