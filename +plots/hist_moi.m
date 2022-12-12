@@ -24,7 +24,7 @@ end
 
 %% Prepare the canvas
 if isempty(pr.axes)
-    [fh, ah] = ngraf.get_canvas(pr.target);
+    [~, ah] = ngraf.get_canvas(pr.target);
 else
     ah = pr.axes;
     axes(ah)
