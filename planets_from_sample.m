@@ -1,4 +1,4 @@
-function planets_from_sample(samplefile,observables,varargin)
+function planets = planets_from_sample(samplefile,observables,varargin)
 %PLANETS_FROM_SAMPLE Convert a ppwd-sample to array of TOFPlanets
 %   planets_from_sample(samplefile, observables, key1=value1, key2=value2,...)
 %   reads sample-space values from samplefile and creates TOFPlanet objects
@@ -11,6 +11,9 @@ function planets_from_sample(samplefile,observables,varargin)
 %toforder - Theory of figures expansion order [ {4} 7 ]
 %toflevels - Number of level surfaces used to discretize density [ positive integer {4096} ]
 %xlevels - Skip-and-spline levels [ integer (-1 to disable) {256} ]
+%savess - Retain full shape information (triples file size) [ true | {false} ]
+%rdclvl - Reduction level [ 0=none, {1=to struct}, 2=to single, 3=to scalars ]
+%savemat If true save to mat file [ true | {false} ]
 
 % If no arguments print usage and return.
 if (nargin == 0) && (nargout == 0)
@@ -37,15 +40,20 @@ for k=1:nsamp
     fprintf('Cooking planet %d of %d...',k,nsamp)
     s = sample(k,:);
     p = cook_planet(s,observables,args);
+    if args.rdclvl > 0
+        p = p.to_struct(args.rdclvl,args.savess);
+    end
     planets = [planets, p]; %#ok<AGROW> 
     fprintf('done.\n')
 end
 fprintf('Cooking planets...done. (%0.2g sec.)\n',toc(t0))
 
 % Save cooked planets
-outname = [samplefile(1:end-4), '_planets.mat'];
-save(outname,"planets")
-fprintf('mPickled %d planets in %s.\n',length(planets),outname)
+if args.savemat
+    outname = [samplefile(1:end-4), '_planets.mat'];
+    save(outname,"planets")
+    fprintf('mPickled %d planets in %s.\n',length(planets),outname)
+end
 end
 
 %% The cooker
@@ -72,6 +80,9 @@ p.addParameter('fixrot',true, @islogicalscalar)
 p.addParameter('toforder', 4, @(n)(n==4)||(n==7))
 p.addParameter('toflevels',4096,@isposintscalar)
 p.addParameter('xlevels',256,@isintscalar)
+p.addParameter('savess',false,@islogicalscalar)
+p.addParameter('rdclvl',1,@isnonnegintscalar)
+p.addParameter('savemat',false,@islogicalscalar)
 
 % Parse name-value pairs and return.
 p.parse(varargin{:})
