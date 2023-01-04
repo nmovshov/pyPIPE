@@ -3,7 +3,7 @@ function lh = hist_moi(planets, varargin)
 
 %% Input parsing
 if nargin == 0
-    fprintf('Usage:\n\thist_nmoi(planets, key=value,...)\n')
+    fprintf('Usage:\n\thist_moi(planets, key=value,...)\n')
     return
 end
 narginchk(1,inf)
