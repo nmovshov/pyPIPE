@@ -800,6 +800,51 @@ classdef TOFPlanet < handle
             gh = legend(ah, 'show','location','ne');
             gh.FontSize = 11;
         end
+
+        function lh = plot_rho_of_P(obj, ax)
+            if isempty(obj.rhobar)
+                warning('Uninitialized object.')
+                return
+            end
+            
+            % Input parsing
+            if nargin < 2, ax = []; end
+            
+            % Prepare the canvas
+            if isempty(ax)
+                fh = figure;
+                set(fh, 'defaultTextInterpreter', 'latex')
+                set(fh, 'defaultLegendInterpreter', 'latex')
+                ah = axes;
+            else
+                ah = ax;
+            end
+            hold(ah, 'on')
+            
+            % Prepare the data
+            x = double(obj.Pi)/1e9;
+            y = double(obj.rhoi)/1000;
+            
+            % Plot the lines (density in 1000 kg/m^3)
+            lh = plot(x,y);
+            lh.LineWidth = 2;
+            lh.DisplayName = obj.name;
+            
+            % Style and annotate axes
+            if isempty(ax)
+                ah.Box = 'on';
+                ah.XScale = 'log';
+                ah.YScale = 'log';
+                xlabel('Pressure, $P$ [GPa]', 'fontsize', 12)
+                ylabel('$\rho$ [1000 kg/m$^3$]', 'fontsize', 12)
+                ah.XLim(1) = 1e-3;
+            end
+            
+            % Legend
+            legend(ah, 'off')
+            gh = legend(ah, 'show','location','ne');
+            gh.FontSize = 11;
+        end
         
         function [ah, lh, gh] = plot_residual_rho_of_r(obj, varargin)
             % Plot rho(r)-rho_xy(r) using a background eos.

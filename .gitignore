@@ -4,6 +4,8 @@
 *.swp
 uranus/samples/fixedrho0
 uranus/samples/fixedmass
+saturn/samples/*.mat
+saturn/samples/*.pickle
 TODO.md
 
 # Byte-compiled / optimized / DLL files
