@@ -10,7 +10,7 @@ if nargin == 0
 end
 narginchk(1,inf)
 p = plots.basic_parser();
-p.addParameter('showad',false)
+p.addParameter('adiabats',[])
 p.addParameter('alfa',1.0,@(x)isscalar(x)&&x>0)
 p.parse(varargin{:})
 pr = p.Results;
@@ -35,8 +35,8 @@ if isempty(pr.axes)
 else
     ah = pr.axes;
     axes(ah);
-    hold(ah, 'on')
 end
+hold(ah, 'on')
 
 %% Plot the area (pressure in Mbar density in 1000 kg/m^3)
 ind = ~isnan(ylo);
@@ -59,47 +59,20 @@ if isempty(pr.axes)
     xlabel('$P$ [Mbar]')
     ylabel('$\rho$ [1000 kg/m$^3$]')
 end
-h = vline(min(pees(end,:)), '--');
+h = vline(min(pees(end,:)), '-');
 h.Color = lh.FaceColor;
+h.LineWidth = 0.5;
 
 %% Reference adiabat overlays
-if pr.showad
-    hhe = barotropes.SCVH.HHE.isenP10T150Y275();
-    h2o = barotropes.SCVH.ANEOSWATER.water_on_isenP10T150Y275();
-    sio2 = barotropes.SCVH.ANEOSSERPENTINE.serpentine_on_isenP10T150Y275();
-    iron = barotropes.SCVH.ANEOSIRON.iron_on_isenP10T150Y275();
-    metalist = [10, 100];
-    Z_mix = ahelpers.metal2z(metalist, 0.275);
-    for k=1:length(metalist)
-        mets(k) = barotropes.IdealMix([hhe,h2o],[1 - Z_mix(k),Z_mix(k)]); %#ok<AGROW>
-    end
+for k=1:length(pr.adiabats)
+    ad = pr.adiabats(k);
     p = logspace(6,13);
-    rho_hhe = hhe.density(p);
-    rho_h2o = h2o.density(p);
-    for k=1:length(metalist)
-        rho_met(k,:) = mets(k).density(p); %#ok<AGROW>
-    end
-    rho_sio2 = sio2.density(p);
-    rho_iron = iron.density(p);
-
-    y_hhe = rho_hhe/1000;
-    y_h2o = rho_h2o/1000;
-    y_met = rho_met/1000;
-    y_sio2 = rho_sio2/1000;
-    y_iron = rho_iron/1000;
-
+    rho = ad.density(p);
+    y = rho/1000;
     ah.YLimMode = 'manual';
     x = p/1e11;
-    plot(x,y_hhe,'k-','DisplayName','H/He adiabat');
-    lstyles = {'--',':'};
-    for k=1:length(mets)
-        plot(x,y_met(k,:),...
-            Color='k',LineStyle=lstyles{k},LineWidth=2,...
-            DisplayName=sprintf('H/He + H$_2$O, $%d\\times$ solar',metalist(k)));
-    end
-    plot(x,y_h2o,'k-.','DisplayName','H$_2$O');
-    plot(x,y_sio2,'k-s','DisplayName','Serpentine');
-    plot(x,y_iron,'k-d','DisplayName','Iron');
+    lstyles = {'-','--',':','-.','-s','-d'};
+    plot(x,y,color='k',LineStyle=lstyles{k},LineWidth=2,DisplayName=ad.name);
 end
 
 %% Misc

@@ -94,7 +94,7 @@ def hist_rho0(fname, newfig=False, bins='auto', density=True, **kwargs):
 
 def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     profs = np.array([p.rhoi for p in planets]).T
     rcs = profs[-1,:]
     ind = np.argsort(rcs)
@@ -141,7 +141,7 @@ def density_envelope(fname, newfig=False, prctile=2, **kwargs):
 def barotrope_envelope(fname, newfig=False, prctile=2, **kwargs):
     from scipy.interpolate import interp1d
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     pees = 1e-11*np.array([p.Pi for p in planets]).T
     rhos = 1e-3*np.array([p.rhoi for p in planets]).T
     x = np.logspace(-6, np.ceil(np.log10(pees.max())), 1024)
