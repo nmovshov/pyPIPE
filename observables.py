@@ -558,5 +558,8 @@ class HAT_P_13_b:
             if kw in dir(self) and kwargs[kw] is not None:
                 setattr(self, kw, val)
 
+class HAT_P_13_b1(HAT_P_13_b):
+    dk2 = 0.01
+
 if __name__ == "__main__":
     print(Saturn)
