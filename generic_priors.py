@@ -54,7 +54,7 @@ def rotation_prior(Prot,obs):
     """A prior on rotation period."""
     mu = obs.P
     sig = obs.dP/2
-    return -0.5*(Prot - mu)**2/(sig**2)
+    return -0.5*(Prot - mu)**2/(sig**2) if np.isfinite(Prot) else 0.0
 
 def rho0_prior(rho0,obs):
     """A prior on the 1-bar density."""
