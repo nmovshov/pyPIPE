@@ -69,6 +69,7 @@ tp.period = Prot;
 tp.opts.toforder = args.toforder;
 tp.opts.xlevels = args.xlevels;
 tp.relax_to_rotation();
+tp.relax_to_HE();
 end
 
 %% Helpers
