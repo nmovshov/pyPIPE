@@ -87,6 +87,8 @@ properties
     dJs
     NMoI
     dNMoI
+    k2
+    dk2
 end
 properties (GetAccess=private)
     G = 6.67430e-11 % http://physics.nist.gov/cuu/index.html
@@ -465,5 +467,45 @@ methods (Static)
         obs.dJs = [0,obs.dJ2,obs.dJ4,obs.dJ6,obs.dJ8,...
                      obs.dJ10,obs.dJ12,obs.dJ14];
     end
+
+    function obs = HAT_P_13_b()
+        obs = observables();
+        pname = 'HAT-P-13-b';
+
+        % Bakos et al. 2009
+        obs.M  = 0.85*observables.Jupiter().M;
+        obs.dM = 0.05*observables.Jupiter().M;
+        obs.a0 = 1.28*observables.Jupiter().a0;
+        obs.s0 = obs.a0;
+
+        % From Batygin et al. 2009
+        obs.k2 = 0.2705;
+        obs.dk2 = 0.155;
+
+        % Boundary conditions (Bakos et al. 2009)
+        obs.P0 = 1e5;                % The reference radius is the 1 bar level
+        obs.T0 = 1653; obs.dT0 = 45; % Table 4
+        obs.rho0 = 0.0169;           % Protosolar ideal gas (mmw=2.319 amu) at (P0,T0)
+        obs.drho0 = 0.0005;          % half the range of T0+/-dT0
+        obs.rhomax = 30000;          % A guess, ANEOS serpentine at 50 Mbar is ~15000
+
+        % Nominal rotation rate, https://ssd.jpl.nasa.gov/ (2018)
+        obs.P = inf;
+        obs.w = 2*pi/obs.P;
+        obs.GM = obs.G*obs.M;
+        obs.q = obs.w^2*obs.a0^3/obs.GM;
+        obs.m = obs.w^2*obs.s0^3/obs.GM;
+        obs.dP = inf;
+        obs.dq = inf;
+        obs.dm = inf;
+
+        % Some methods (e.g. priors.py) use these fiducial values for scale...
+        obs.rhobar = obs.M/(4*pi/3*obs.s0^3);
+
+        % Empty placeholders for Js and dJs
+        obs.Js = [-1., 0, 0, 0, 0, 0, 0, 0];
+        obs.dJs = [0,inf,inf,inf,inf,inf,inf,inf];
+    end
+
 end
 end
