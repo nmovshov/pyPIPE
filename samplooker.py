@@ -119,7 +119,7 @@ def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
 
 def density_envelope(fname, newfig=False, prctile=2, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     profs = np.array([p.rhoi for p in planets]).T
     prcs_lo = prctile
     prcs_hi = 100 - prcs_lo
