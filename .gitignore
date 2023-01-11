@@ -4,6 +4,8 @@
 *.swp
 uranus/samples/fixedrho0
 uranus/samples/fixedmass
+uranus/samples/*.mat
+uranus/samples/*.pickle
 saturn/samples/*.mat
 saturn/samples/*.pickle
 TODO.md
