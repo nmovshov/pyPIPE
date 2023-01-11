@@ -8,6 +8,8 @@ uranus/samples/*.mat
 uranus/samples/*.pickle
 saturn/samples/*.mat
 saturn/samples/*.pickle
+HAT-P-13-b/samples/*.mat
+HAT-P-13-b/samples/*.pickle
 TODO.md
 
 # Byte-compiled / optimized / DLL files
