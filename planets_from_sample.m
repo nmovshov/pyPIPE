@@ -6,7 +6,7 @@ function planets = planets_from_sample(samplefile,observables,varargin)
 %
 %KNOWN PARAMETER KEYS (case ignored and unique partial match allowed)
 %
-%nsamples - Number of planets to create, 0 for full sample [ positive integer {0} ]
+%nsamples - Number of planets to create, 0 for full sample [ positive integer {inf} ]
 %fixrot - If true use observables.P else use first element of sample-space vector [ {true} | false ]
 %toforder - Theory of figures expansion order [ {4} 7 ]
 %toflevels - Number of level surfaces used to discretize density [ positive integer {4096} ]
@@ -29,10 +29,10 @@ args = PCL(varargin{:});
 
 % Load sample-space array from file
 sample = readmatrix(samplefile);
+fprintf('Found %d records in %s.\n',size(sample,1),samplefile);
 
 % Create a planet from each row
-nsamp = args.nsamples;
-if nsamp == 0, nsamp = size(sample,1); end
+nsamp = min(args.nsamples,size(sample,1));
 fprintf('Cooking planets...\n')
 planets = [];
 t0 = tic;
@@ -76,7 +76,7 @@ end
 function args = PCL(varargin)
 p = inputParser;
 p.FunctionName = mfilename;
-p.addParameter('nsamples', 0, @isnonnegintscalar)
+p.addParameter('nsamples', inf, @isnonnegintscalar)
 p.addParameter('fixrot',true, @islogicalscalar)
 p.addParameter('toforder', 4, @(n)(n==4)||(n==7))
 p.addParameter('toflevels',4096,@isposintscalar)
