@@ -117,6 +117,36 @@ def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
+def ensemble_of_barotropes(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
+    # Prepare the data
+    planets = load_planets(fname) if type(fname) is str else fname
+    pees = 1e-11*np.array([p.Pi for p in planets]).T
+    rhos = 1e-3*np.array([p.rhoi for p in planets]).T
+
+    rcs = rhos[-1,:]
+    ind = np.argsort(rcs)
+    pees = pees[:,ind]
+    rhos = rhos[:,ind]
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot the lines
+    skip = int(np.ceil(len(planets)/nlines))
+    for k in range(0,len(planets),skip):
+        x = pees[:,k]
+        y = rhos[:,k]
+        plt.plot(x,y,alpha=alfa,**kwargs)
+
+    # Style, annotate, and show
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlim(left=1e-5)
+    plt.ylim(1e-3, 100)
+    plt.xlabel(r'$p$ [Mbar]')
+    plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.show(block=False)
+
 def density_envelope(fname, newfig=False, prctile=2, **kwargs):
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
