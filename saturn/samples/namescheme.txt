@@ -1,1 +1,0 @@
-<poly_deg>_<toforder>_<J_max>_<obsnum>_<PV/PF>.txt
