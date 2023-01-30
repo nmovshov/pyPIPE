@@ -292,6 +292,11 @@ class Saturn9(Saturn):
     dJ14 = np.inf
     dJs = np.array((0, dJ2, dJ4, dJ6, dJ8, dJ10, dJ12, dJ14))
 
+class Saturn19(Saturn9):
+    """Using the effective (wrong) period implied by Movshovitz et al. 2019."""
+    P = 37960
+    dP = 2 # 2-sigma
+
 class Uranus:
     pname = 'uranus'
 
