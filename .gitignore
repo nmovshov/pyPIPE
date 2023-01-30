@@ -4,6 +4,8 @@
 *.swp
 uranus/pernp_uncon_ppwd/fixedrho0
 uranus/pernp_uncon_ppwd/fixedmass
+uranus/perpres_fixref_uncon_ppwd/*.mat
+uranus/perpres_fixref_uncon_ppwd/*.pickle
 saturn/perpres_fixref_uncon_ppwd/*.mat
 saturn/perpres_fixref_uncon_ppwd/*.pickle
 HAT-P-13-b/samples/*.mat
