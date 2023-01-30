@@ -38,6 +38,8 @@ def cook_planet(x, obs, opts):
         tp.period = np.inf
     if opts.preserve_period:
         tp.relax_to_rotation()
+    else:
+        tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
     tp.relax_to_HE(fixmass=opts.fix_mass,moi=True,pressure=True)
 
     if opts.with_k2:
