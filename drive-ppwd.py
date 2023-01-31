@@ -106,6 +106,8 @@ def _lnprob(x,obs,args):
             dsqr += losses.NMoI(tp.NMoI, obs)**2
         if args.with_k2:
             dsqr += losses.k2((svec, dvec), obs)**2
+        if args.clos:
+            dsqr += eval(args._clos)**2
     return -0.5*(dsqr/args.temperature) + P
 
 def _read_seeds(args, outdir, obs):
@@ -327,6 +329,8 @@ def _PCL():
     likegroup.add_argument('-f', '--fakelike', action='store_true',
         help="Use fake (uniform) likelihood function (e.g. to test prior)")
 
+    likegroup.add_argument('--clos') # undocumented custom loss term
+
     mdlgroup = parser.add_argument_group('Additional model options')
 
     mdlgroup.add_argument('--fix-mass', type=int, default=1,
@@ -388,6 +392,8 @@ def _PCL():
     if args.no_spin:
         args.Jays = np.array([0])
         args.fix_rot = 1
+    if args.clos:
+        args._clos = compile(f"losses.{args.clos}(tp,obs)",'<string>','eval')
 
     return args
 

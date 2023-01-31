@@ -62,8 +62,6 @@ def rhomax(prof, obs):
     romax = prof[1][-1]
     return (max(romax, obs.rhomax) - obs.rhomax)/obs.rhobar
 
-def _mloss(prof,Js,obs,jflag):
-    d2 = 0
-    d2+= losses.euclid_Jnm(Js,obs,jflag)**2
-    d2+= losses.mass(prof,obs)**2
-    return np.sqrt(d2)
+### undocumented ad-hoc losses
+def _french23(planet, obs):
+    return np.sqrt((planet.s0 - obs.a0)**2)
