@@ -49,8 +49,8 @@ def k2(prof, obs):
 def NMoI(I, obs):
     return np.sqrt(((I - obs.NMoI)/obs.dNMoI)**2)
 
-def period(P, obs):
-    return np.sqrt(((P - obs.P)/obs.dP)**2)
+# def period(P, obs):
+#     return np.sqrt(((P - obs.P)/obs.dP)**2)
 
 def rho0(prof, obs):
     """A prior on 1-bar density."""
