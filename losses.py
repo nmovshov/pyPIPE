@@ -64,4 +64,31 @@ def rhomax(prof, obs):
 
 ### undocumented ad-hoc losses
 def _french23(planet, obs):
-    return np.sqrt((planet.s0 - obs.a0)**2)
+    def J2corr(J6p):
+        J2= 3510.653e-6 + 0.40036 * (J6p-0.5e-6)
+        return J2
+
+    # Eq. C5, with \Delta a=0
+    def J4corr(J6p):
+        J4= -34.054e-6 + 1.0788 * (J6p-0.5e-6)
+        return J4
+
+    J2p, J4p, J6p = planet.Js[1:4]
+    # terms in covariance matrix
+    a = 0.389e-6**2
+    b = 0.9859 * 0.389e-6 * 0.439e-6
+    c = 0.439e-6**2
+    # Eqs. C11, C12  eigenvalues
+    lambda_1 = (a+c)/2 + np.sqrt(((a-c)/2)**2 + b**2)
+    lambda_2 = (a+c)/2 - np.sqrt(((a-c)/2)**2 + b**2)
+    # Eq. C17 - rotation of error ellipse in J2,J4 plane
+    theta =np.arctan2(lambda_1 - a,b)
+    # Eqs. C15, C16
+    x = J2p - J2corr(J6p)
+    y = J4p - J4corr(J6p)
+    # Eqs. C13, C14
+    xp =  x * np.cos(theta) + y * np.sin(theta)
+    yp = -x * np.sin(theta) + y * np.cos(theta)
+    # Eq. C6 - standard deviation of input J2', J4', J6' from occultation gravity solution
+    r = np.sqrt(xp**2/lambda_1 + yp**2/lambda_2)
+    return r

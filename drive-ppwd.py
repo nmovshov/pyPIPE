@@ -393,7 +393,8 @@ def _PCL():
         args.Jays = np.array([0])
         args.fix_rot = 1
     if args.clos:
-        args._clos = compile(f"losses.{args.clos}(tp,obs)",'<string>','eval')
+        #args._clos = compile(f"losses.{args.clos}(tp,obs)",'<string>','eval')
+        args._clos = f"losses.{args.clos}(tp,obs)"
 
     return args
 
