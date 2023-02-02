@@ -166,6 +166,7 @@ def density_envelope(fname, newfig=False, prctile=2, **kwargs):
     # Style, annotate, and show
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
+    plt.ylim((0,plt.ylim()[1]))
     plt.show(block=False)
 
 def barotrope_envelope(fname, newfig=False, prctile=2, **kwargs):
