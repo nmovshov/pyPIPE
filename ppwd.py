@@ -146,6 +146,11 @@ def ppwd_transform(x,obs=None):
     y = np.concatenate((y1, y2, y3))
     return y
 
+def ppwd_pv_transform(x,obs):
+    """Transform mcmc sample vector with varying rotation period."""
+    y = np.hstack((x[0]*obs.dP/2 + obs.P, ppwd_transform(x[1:],obs)))
+    return y
+
 def ppwd_untransform(x,obs=None):
     """Transform ppwd params vector to sample space."""
     sup = _supports(obs)
