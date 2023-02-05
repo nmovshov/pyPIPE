@@ -7,7 +7,11 @@ import numpy as np
 from scipy.stats import norm, chi2
 cout = sys.stdout.write
 
-def lossify_planets(planets, obs, Jmax, rho0=True, mass=False):
+def _ecdf(a):
+    x, counts = np.unique(a, return_counts=True)
+    return x, np.cumsum(counts)/len(a)
+
+def lossify_planets(planets, obs, Jmax, rho0=True, mass=False, period=False):
     import losses
     J_ord = [2*n for n in range(1,int(Jmax/2)+1)]
     L = []
@@ -17,6 +21,9 @@ def lossify_planets(planets, obs, Jmax, rho0=True, mass=False):
             el = np.sqrt(el**2 + losses.rho0((p.si,p.rhoi),obs)**2)
         if mass:
             el = np.sqrt(el**2 + losses.mass((p.si,p.rhoi),obs)**2)
+        if period:
+            mu, sig = obs.P, obs.dP/2
+            el = np.sqrt(el**2 + ((p.period - mu)/sig)**2)
         L.append(el)
     return np.array(L)
 
