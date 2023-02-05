@@ -314,7 +314,7 @@ methods (Static)
 
     function obs = Saturn19()
         % Using the effective (wrong) period implied by Movshovitz et al. 2019.
-        obs = observables.Saturn9()
+        obs = observables.Saturn9();
         obs.P = 37960;
         obs.dP = 2; % 2-sigma
     end
