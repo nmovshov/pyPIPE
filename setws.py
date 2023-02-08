@@ -15,5 +15,6 @@ import ppwd
 import TOFPlanet
 import ahelpers as ah
 import losses
+import generic_priors as priors
 if sys.platform == 'win32':
     import samplooker as spl
