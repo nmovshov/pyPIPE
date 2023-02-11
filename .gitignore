@@ -8,8 +8,10 @@ uranus/perpres_fixref_uncon_ppwd/*.mat
 uranus/perpres_fixref_uncon_ppwd/*.pickle
 saturn/perpres_fixref_uncon_ppwd/*.mat
 saturn/perpres_fixref_uncon_ppwd/*.pickle
-saturn/pernp_varmas_uncon_ppwd/*.pickle
+saturn/perpres_varmas_uncon_ppwd/*.mat
+saturn/perpres_varmas_uncon_ppwd/*.pickle
 saturn/pernp_varmas_uncon_ppwd/*.mat
+saturn/pernp_varmas_uncon_ppwd/*.pickle
 HAT-P-13-b/samples/*.mat
 HAT-P-13-b/samples/*.pickle
 TODO.md
