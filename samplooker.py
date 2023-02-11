@@ -24,7 +24,7 @@ def _get_canvas(newfig):
 
 def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     M = np.array([p.M for p in planets])/1e24
 
     # Prepare the canvas
@@ -317,7 +317,7 @@ def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs)
 def hist_attr(fname, attr,
     obs=None,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     vals = np.array([getattr(p,attr,np.nan) for p in planets])
     if obs is None:
         v_mu = vals.mean()
