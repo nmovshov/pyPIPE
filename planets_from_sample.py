@@ -18,36 +18,36 @@ import ppwd
 the_mdl = ppwd.ppwd_profile
 the_transform = ppwd.ppwd_transform
 
-def cook_planet(x, obs, opts):
-    """Create a planet object from sample-space parameters."""
-    if opts.fix_rot:
-        Prot = obs.P
-        x = x
-    else:
-        Prot = x[0]*obs.dP/2 + obs.P
-        x = x[1:]
-    y = the_transform(x, obs)
-    svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
-    tp = TOFPlanet.TOFPlanet(obs)
-    tp.si = svec*obs.s0
-    tp.rhoi = dvec
-    tp.period = Prot
-    tp.opts['toforder'] = opts.toforder
-    tp.opts['xlevels'] = opts.xlevels
-    if opts.no_spin:
-        tp.period = np.inf
-    if opts.preserve_period:
-        tp.relax_to_rotation(opts.fix_mass)
-    else:
-        tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
-    tp.relax_to_HE(fixmass=opts.fix_mass,moi=True,pressure=True)
+# def cook_planet(x, obs, opts):
+#     """Create a planet object from sample-space parameters."""
+#     if opts.fix_rot:
+#         Prot = obs.P
+#         x = x
+#     else:
+#         Prot = x[0]*obs.dP/2 + obs.P
+#         x = x[1:]
+#     y = the_transform(x, obs)
+#     svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
+#     tp = TOFPlanet.TOFPlanet(obs)
+#     tp.si = svec*obs.s0
+#     tp.rhoi = dvec
+#     tp.period = Prot
+#     tp.opts['toforder'] = opts.toforder
+#     tp.opts['xlevels'] = opts.xlevels
+#     if opts.no_spin:
+#         tp.period = np.inf
+#     if opts.preserve_period:
+#         tp.relax_to_rotation(opts.fix_mass)
+#     else:
+#         tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
+#     tp.relax_to_HE(fixmass=opts.fix_mass,moi=True,pressure=True)
 
-    if opts.with_k2:
-        tp.k2 = ah.lovek2(tp.si, tp.rhoi)
-    if not opts.savess:
-        tp.ss = None
-        tp.SS = None
-    return tp
+#     if opts.with_k2:
+#         tp.k2 = ah.lovek2(tp.si, tp.rhoi)
+#     if not opts.savess:
+#         tp.ss = None
+#         tp.SS = None
+#     return tp
 
 def _PCL():
     # Return struct with command line arguments as fields.
@@ -142,7 +142,7 @@ def _main(spool,args):
         if (args.ncores == 1) and (args.verbosity > 0):
             print(f"cooking planet {k+1} of {nsamp}...",end='')
         s = sample[k]
-        p = cook_planet(s,obs,args)
+        p = ah.cook_planet(s,obs,the_mdl,the_transform,**args.__dict__)
         planets.append(p)
         if (args.ncores == 1) and (args.verbosity > 0):
             print("done.")

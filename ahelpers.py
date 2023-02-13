@@ -4,8 +4,51 @@
 
 import sys, os
 import numpy as np
+import TOFPlanet
 from scipy.stats import norm, chi2
 cout = sys.stdout.write
+
+def cook_planet(x, obs, mdl, transform, **kwargs):
+    """Create a planet object from sample-space parameters."""
+    opts = {**{'fix_rot':True,
+               'fix_mass':True,
+               'preserve_period':True,
+               'no_spin':False,
+               'with_k2':False,
+               'toforder':4,
+               'toflevels':4096,
+               'xlevels':256,
+               'savess':False},
+            **kwargs}
+
+    if opts['fix_rot']:
+        Prot = obs.P
+        x = x
+    else:
+        Prot = x[0]*obs.dP/2 + obs.P
+        x = x[1:]
+    y = transform(x, obs)
+    svec, dvec = mdl(opts['toflevels'], y, obs.rho0)
+    tp = TOFPlanet.TOFPlanet(obs)
+    tp.si = svec*obs.s0
+    tp.rhoi = dvec
+    tp.period = Prot
+    tp.opts['toforder'] = opts['toforder']
+    tp.opts['xlevels'] = opts['xlevels']
+    if opts['no_spin']:
+        tp.period = np.inf
+    if opts['preserve_period']:
+        tp.relax_to_rotation(opts['fix_mass'])
+    else:
+        tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
+    tp.relax_to_HE(fixmass=opts['fix_mass'],moi=True,pressure=True)
+
+    if opts['with_k2']:
+        tp.k2 = ah.lovek2(tp.si, tp.rhoi)
+    if not opts['savess']:
+        tp.ss = None
+        tp.SS = None
+    return tp
 
 def _ecdf(a):
     x, counts = np.unique(a, return_counts=True)
