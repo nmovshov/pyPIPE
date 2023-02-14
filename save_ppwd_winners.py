@@ -41,7 +41,7 @@ def _main(args):
         print(f"found and removed {sum(fakers)} fakers.")
 
     # In strict mode we cook the candidates and require independent scores
-    if args.J_strict:
+    if args.J_strict and Z.size:
         # Load planet observables
         try:
             obs = getattr(observables, args.observables)
