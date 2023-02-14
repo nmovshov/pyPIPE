@@ -20,7 +20,7 @@ def _main(args):
     print()
     print("C.shape = ", C.shape)
 
-    # Candidates have log-like value (minus prior) euiv to 2.5 sigma with n dof
+    # Candidates have loglike value (minus prior) equiv to 2.5 sigma with n dof
     keepers = ah.winners(C,L,args.dof,ppwd.ppwd_prior,args.fix_rot)
     print("keepers.shape = ", keepers.shape)
     Z = C[keepers,-1,:]
@@ -39,6 +39,27 @@ def _main(args):
                 fakers.append(False)
         Z = Z[~np.array(fakers)]
         print(f"found and removed {sum(fakers)} fakers.")
+
+    # In strict mode we cook the candidates and require independent scores
+    if args.J_strict:
+        # Load planet observables
+        try:
+            obs = getattr(observables, args.observables)
+        except:
+            print("Could not find planet observables; check spelling?")
+            sys.exit(1)
+
+        colabs = []
+        ind = [o//2 for o in range(2,args.J_strict+1,2)]
+        for z in Z:
+            p = ah.cook_planet(z,obs,the_mdl,the_transform,**args.__dict__)
+            E = np.abs(p.Js[ind] - obs.Js[ind])/obs.dJs[ind]
+            if np.any(E > args.J_thresh):
+                colabs.append(True)
+            else:
+                colabs.append(False)
+        Z = Z[~np.array(colabs)]
+        print(f"found and removed {sum(colabs)} collaborators.")
 
     # abyu
     print(f"appending {Z.shape} to {args.outname}.")
@@ -64,6 +85,9 @@ def _PCL():
     parser.add_argument('--J-strict', type=int, default=0,
         help="passing positive J-strict will require winners to " +
         "satisfy individual J values in addition to chi2 threshold")
+
+    parser.add_argument('--J-thresh', type=float, default=2.5,
+        help="a sigma-threshold for strict J conditions")
 
     parser.add_argument('-o','--observables',
             help="Observables struct (usually planet name, " +
