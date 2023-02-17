@@ -39,7 +39,7 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_moi(fname,rol=False,newfig=False,bins='auto',density=True,**kwargs):
+def hist_moi(fname,rol=False,newfig=False,density=True,show=True,**kwargs):
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
     ice = np.array([p.NMoI for p in planets])
@@ -51,14 +51,15 @@ def hist_moi(fname,rol=False,newfig=False,bins='auto',density=True,**kwargs):
     _get_canvas(newfig)
 
     # Plot the histogram
-    plt.hist(ice,bins=bins,density=density,**kwargs)
+    plt.hist(ice,density=density,**kwargs)
     plt.vlines(mu, *plt.ylim(), ls='--', color='r', label=f"{mu:.4f}")
 
     # Style, annotate, and show
     plt.xlabel(r'Normalized moment of inertia, $I/Ma_0^2$')
     plt.yticks([])
     plt.legend()
-    plt.show(block=False)
+    if show:
+        plt.show(block=False)
 
 def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
@@ -147,7 +148,7 @@ def ensemble_of_barotropes(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def density_envelope(fname, newfig=False, prctile=2, **kwargs):
+def density_envelope(fname, newfig=False, prctile=2, show=True, **kwargs):
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
     profs = np.array([p.rhoi for p in planets]).T
@@ -167,9 +168,10 @@ def density_envelope(fname, newfig=False, prctile=2, **kwargs):
     plt.xlabel(r'Level surface radius, $s/R_m$')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.ylim((0,plt.ylim()[1]))
-    plt.show(block=False)
+    if show:
+        plt.show(block=False)
 
-def barotrope_envelope(fname, newfig=False, prctile=2, **kwargs):
+def barotrope_envelope(fname, newfig=False, prctile=2, show=True, **kwargs):
     from scipy.interpolate import interp1d
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
@@ -202,7 +204,8 @@ def barotrope_envelope(fname, newfig=False, prctile=2, **kwargs):
     plt.vlines(pees[-1,:].min(), *plt.ylim(), linestyle=':', color='r')
     plt.xlabel(r'$p$ [Mbar]')
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
-    plt.show(block=False)
+    if show:
+        plt.show(block=False)
 
 def plot_profile(s, rho, newfig=False, **kwargs):
     # Prepare the data
