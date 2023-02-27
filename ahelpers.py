@@ -44,7 +44,7 @@ def cook_planet(x, obs, mdl, transform, **kwargs):
     tp.relax_to_HE(fixmass=opts['fix_mass'],moi=True,pressure=True)
 
     if opts['with_k2']:
-        tp.k2 = ah.lovek2(tp.si, tp.rhoi)
+        tp.k2 = lovek2(tp.si, tp.rhoi)
     if not opts['savess']:
         tp.ss = None
         tp.SS = None

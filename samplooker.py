@@ -39,6 +39,28 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
+def hist_ppwd(fname,rol=False,dims='all',trans=None,**kwargs):
+    # Prepare the data
+    C = np.loadtxt(fname) if type(fname) is str else fname
+    if trans is not None:
+        C = np.array([trans(row) for row in C])
+    # Inspect histograms
+    if dims == 'all':
+        dims = tuple(range(C.shape[-1]))
+    if type(dims) is int:
+        dims = [dims]
+    for dim in dims:
+        x = C[:,dim]
+        if rol:
+            x = x[np.abs(x - x.mean()) < 3*x.std()]
+        plt.figure()
+        plt.hist(x, density=True, **kwargs)
+        plt.ylabel('x{}'.format(dim))
+        plt.annotate('mean={:g}'.format(
+            np.mean(x)), (0.01,0.9), xycoords='axes fraction');
+        plt.show(block=False)
+        pass
+
 def hist_moi(fname,rol=False,newfig=False,density=True,show=True,**kwargs):
     # Prepare the data
     planets = load_planets(fname) if type(fname) is str else fname
