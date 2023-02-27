@@ -12,6 +12,8 @@ saturn/perpres_varmas_uncon_ppwd/*.mat
 saturn/perpres_varmas_uncon_ppwd/*.pickle
 saturn/pernp_varmas_uncon_ppwd/*.mat
 saturn/pernp_varmas_uncon_ppwd/*.pickle
+dkplanet/*.mat
+dkplanet/*.pickle
 HAT-P-13-b/samples/*.mat
 HAT-P-13-b/samples/*.pickle
 TODO.md
