@@ -356,10 +356,46 @@ def hist_attr(fname, attr,
 
     # Plot the histogram
     plt.hist(vals, bins=bins, density=density, **kwargs)
-    plt.vlines(v_mu, *plt.ylim(), ls='--', lw=2, color='k')
+    plt.vlines(v_mu, *plt.ylim(), ls='--', lw=2, color='r')
     plt.vlines([v_mu-v_sig,v_mu+v_sig], *plt.ylim(), ls=':', lw=1, color='k')
 
     # Style, annotate, and show
     plt.xlabel(attr)
     plt.yticks([])
     plt.show(block=False)
+
+def k2_v_I(fname,newfig=False,rol=False,show=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname) if type(fname) is str else fname
+    I = np.array([p.NMoI for p in planets])
+    K = np.array([p.k2 for p in planets])
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot
+    plt.plot(I, K, '+', **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Normalized MoI, $C/MR^2$')
+    plt.ylabel(r'Tidal $k_2$')
+    if show:
+        plt.show(block=False)
+
+def I_v_k2(fname,newfig=False,rol=False,show=True,**kwargs):
+    # Prepare the data
+    planets = load_planets(fname) if type(fname) is str else fname
+    I = np.array([p.NMoI for p in planets])
+    K = np.array([p.k2 for p in planets])
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot
+    plt.plot(K, I, '+', **kwargs)
+
+    # Style, annotate, and show
+    plt.xlabel(r'Tidal $k_2$')
+    plt.ylabel(r'Normalized MoI, $C/MR^2$')
+    if show:
+        plt.show(block=False)
