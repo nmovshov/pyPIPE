@@ -56,6 +56,50 @@ methods (Static)
             L(k) = sqrt(el);
         end
     end
-    
+
+    function k2 = lovek2(zvec, dvec)
+    %LOVEK2 Tidal Love number k2 from density profile.
+    %
+    % Algorithm
+    % ---------
+    % Sterne 1939 as described in Buhler 2016.
+
+    % Input handling
+    if nargin == 0
+        fprintf('Usage:\n\tlovek2(zvec, dvec)\n')
+        return
+    end
+    narginchk(2,2);
+    validateattributes(zvec,{'numeric'},{'real','finite','positive','vector'})
+    validateattributes(dvec,{'numeric'},{'real','finite','nonnegative','vector'})
+    zvec = zvec(:);
+    dvec = dvec(:);
+    assert(isequal(size(zvec),size(dvec)))
+    if zvec(2) < zvec(1)
+        zvec = flipud(zvec);
+        dvec = flipud(dvec);
+    end
+    zvec = zvec/zvec(end);
+
+    % Climb up the radius with Buhler (2016) eq. 2
+    m = dvec(1)*zvec(1)^3; % starting mass
+    rhom = m/zvec(1)^3; % starting mean density
+    eta = 0;
+    for k=1:length(zvec) - 1
+        s1 = (6 - 6*(dvec(k)/rhom)*(eta + 1) + eta - eta^2)/zvec(k);
+        zhalf = zvec(k) + 0.5*(zvec(k+1) - zvec(k));
+        dhalf = dvec(k) + 0.5*(dvec(k+1) - dvec(k));
+        mhalf = m + dhalf*(zhalf^3 - zvec(k)^3);
+        rhalf = mhalf/zhalf^3;
+        ehalf = eta + s1*(zhalf - zvec(k));
+        s2 = (6 - 6*(dhalf/rhalf)*(ehalf + 1) + ehalf - ehalf^2)/zhalf;
+        eta = eta + s2*(zvec(k+1) - zvec(k));
+        m = mhalf + dvec(k+1)*(zvec(k+1)^3 - zhalf^3);
+        rhom = m/zvec(k+1)^3;
+    end
+
+    % Return
+    k2 = (3 - eta)/(2 + eta);
+    end
 end
 end
