@@ -399,3 +399,31 @@ def I_v_k2(fname,newfig=False,rol=False,show=True,**kwargs):
     plt.ylabel(r'Normalized MoI, $C/MR^2$')
     if show:
         plt.show(block=False)
+
+def dI_v_dk2(planetss,newfig=False,rol=False,show=True,**kwargs):
+    # Prepare the data
+    dI = []
+    dK = []
+    for planets in planetss:
+        I = np.array([p.NMoI for p in planets])
+        K = np.array([p.k2 for p in planets])
+        dI.append(I.std())
+        dK.append(K.std())
+
+    # Prepare the canvas
+    _get_canvas(newfig)
+
+    # Plot
+    plt.plot(dK, dI, '+', **kwargs)
+
+    # Style, annotate, and show
+    plt.xscale('log')
+    # plt.xticks(dK, [f"{x:0.3e}" for x in dK])
+    plt.xticks([],minor=True)
+    plt.xlabel(r'$\sigma\left(k_2\right)$')
+    plt.ylabel(r'$\sigma\left(C/MR^2\right)$')
+    if show:
+        plt.show(block=False)
+
+    if True:
+        pass
