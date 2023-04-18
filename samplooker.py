@@ -85,7 +85,7 @@ def hist_moi(fname,rol=False,newfig=False,density=True,show=True,**kwargs):
 
 def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(fname) if type(fname) is str else fname
     rcs = np.array([p.rhoi[-1] for p in planets])
 
     # Prepare the canvas

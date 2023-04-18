@@ -91,7 +91,7 @@ def _lnprob(x,obs,args):
         tp.rhoi = dvec
         tp.period = Prot
         if args.preserve_period:
-            tp.relax_to_rotation()
+            tp.relax_to_rotation(fixmass=args.fix_mass)
         else:
             tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
             tp.relax_to_HE(fixmass=args.fix_mass,moi=args.with_moi)
