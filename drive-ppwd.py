@@ -31,6 +31,7 @@
 import sys, os
 import numpy as np
 import argparse
+import warnings
 import emcee
 import schwimmbad
 from timeit import default_timer as timer
@@ -73,6 +74,9 @@ def _lnprob(x,obs,args):
     P = (the_prior(xx, obs) + generic_priors.rotation_prior(Prot, obs))
     if P == -np.inf:
         return P
+    if np.isnan(P):
+        warnings.warn("sample-space parameter prior = NaN")
+        return -np.inf
 
     # Transform from sample space to model space and create the density profile
     y = the_transform(xx, obs)
@@ -82,6 +86,11 @@ def _lnprob(x,obs,args):
     # Evaluate prior on pre-solved planet
     if not args.fakelike:
         P = P + generic_priors.gasplanet(dvec, obs)
+        if P == -np.inf:
+            return P
+        if np.isnan(P):
+            warnings.warn("gasplanet prior = NaN")
+            return -np.inf
 
     # If model not pre-rejected, relax to HE and evaluate
     dsqr = 0
@@ -97,11 +106,17 @@ def _lnprob(x,obs,args):
             tp.relax_to_HE(fixmass=args.fix_mass,moi=args.with_moi)
         svec, dvec = tp.si, tp.rhoi
         Js = tp.Js
+        if np.isnan(Js):
+            warnings.warn("Js = NaN")
+            return -np.inf
 
         jflag = args.Jays[args.Jays > 0]
         dsqr = (losses.mass((svec,dvec),obs)**2 +
                 losses.rho0((svec,dvec),obs)**2 +
                 losses.euclid_Jnm(Js,obs,jflag)**2)
+        if np.isnan(dsqr):
+            warnings.warn("dsqr = NaN")
+            return -np.inf
         if args.with_moi:
             dsqr += losses.NMoI(tp.NMoI, obs)**2
         if args.with_k2:
