@@ -106,7 +106,7 @@ def _lnprob(x,obs,args):
             tp.relax_to_HE(fixmass=args.fix_mass,moi=args.with_moi)
         svec, dvec = tp.si, tp.rhoi
         Js = tp.Js
-        if np.isnan(Js):
+        if np.isnan(Js).any():
             warnings.warn("Js = NaN")
             return -np.inf
 
