@@ -75,10 +75,10 @@ class TOFPlanet:
             old_Js = self.Js
             old_m = self.mrot
             self.relax_to_HE(fixradius=True,fixmass=fixmass,fixrot=True)
-            dJs = np.abs((self.Js - old_Js)/self.Js)
-            dJs = np.max(dJs[np.isfinite(dJs)])
+            dJ2 = np.abs((self.Js[1] - old_Js[1])/self.Js[1])
+            # dJ2 = np.max(dJ2[np.isfinite(dJ2)])
             drot = np.abs(old_m - self.mrot)
-            if (drot < self.opts['drottol']) and (dJs < self.opts['dJtol']):
+            if (drot < self.opts['drottol']) and (dJ2 < self.opts['dJtol']):
                 break
         if it == self.opts['MaxIterRot']:
             warnings.warn('Rotation period may not be fully converged.')
