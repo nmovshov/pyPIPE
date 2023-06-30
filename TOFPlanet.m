@@ -87,27 +87,22 @@ classdef TOFPlanet < handle
     
     %% A simple constructor
     methods
-        function obj = TOFPlanet(obs,varargin)
+        function obj = TOFPlanet(varargin)
             % A simple constructor of TOFPlanet objects.
-            % TOFPlanet(OBS, 'OPTION1', VALUE, 'OPTION2', VALUE2,...)
+            % TOFPlanet(OBS,'OPTION1', VALUE, 'OPTION2', VALUE2,...)
             
-            % Set reference values from obs (or undocumented default planet)
-            if nargin == 0 % prefill critical fields with reasonable values
-                obs.pname = 'planet';
-                obs.M  = 1898.187e24;
-                obs.a0 = 71492e3;
-                obs.s0 = 69911e3;
-                obs.P0 = 1e5;
-                obs.P = 0.41354*24*3600;
+            % Set reference values from obs
+            if mod(nargin,2)
+                obs = varargin{1};
+                obj.set_observables(obs);
+                varargin(1) = [];
             end
-            obj.set_observables(obs);
             % Populate options struct
             obj.opts = tofset(varargin{:});
             
             % Init privates
             obj.aos = 1;
             obj.G = 6.67430e-11; % m^3 kg^-1 s^-2 (2018 NIST reference)
-            obj.GM = obj.G*obj.mass;
         end
     end % End of constructor block
     
@@ -192,19 +187,18 @@ classdef TOFPlanet < handle
                 obj.renormalize();
                 
                 % Calculate changes in shape/rotation
-                dJs = abs((obj.Js - old_Js)./old_Js);
-                dJs = max(dJs(isfinite(dJs)));
+                dJs = abs(obj.Js(2) - old_Js(2));
                 drot = abs(obj.mrot - old_m);
                 
                 if (verb > 0)
                     fprintf('Rotationpass %d (of max %d)...done. (%g sec)\n',...
                         iter, obj.opts.MaxIterRot, toc(t_pass))
-                    fprintf('var(drot) = %g (%g required); dJ = %g (%g required).\n\n',...
+                    fprintf('var(drot) = %g (%g required); dJ2 = %g (%g required).\n\n',...
                         drot, obj.opts.drottol, dJs, obj.opts.dJtol)
                 end
                 
-                % The stopping criterion is to satisfy both J and rho tolerance
-                if (drot <= obj.opts.drottol) && dJs < obj.opts.dJtol
+                % The stopping criterion is to satisfy both J and rot tolerance
+                if (drot < obj.opts.drottol) && (dJs < obj.opts.dJtol)
                     break
                 end
                 
@@ -233,40 +227,46 @@ classdef TOFPlanet < handle
             end
         end
 
-        function ET = relax_to_barotrope(obj)
-            % Relax equilibrium shape, gravity, and density simultaneously.
+        function iter = relax_to_barotrope(obj)
+            % Relax equilibrium shape rotation and density simultaneously.
             
             % First some checks.
-            if isempty(obj.eos)
+            if isempty(obj.si) || isempty(obj.rhoi)
                 warning('TOFPLANET:assertion',...
-                    'Set valid barotrope first (<obj>.eos = <barotrope>).')
+                    'Set radius and density vectors (<obj>.si,<obj>.rhoi).')
                 return
             end
             if numel(obj.renormalize()) < 2
                 warning('TOFPLANET:assertion',...
-                    'First set reference mass and equatorial radius.')
+                    'Set reference mass and equatorial radius.')
                 return
             end
             if isempty(obj.mrot)
                 warning('TOFPLANET:assertion',...
-                    'First set rotation period (<obj>.period).')
+                    'Set rotation period (<obj>.period).')
+                return
+            end
+            if isempty(obj.eos)
+                warning('TOFPLANET:assertion',...
+                    'Set valid barotrope (<obj>.eos = <barotrope>).')
                 return
             end
             if isempty(obj.P0)
                 warning('TOFPLANET:P0',...
-                    'First set reference pressure (<obj>.P0).')
+                    'Set reference pressure (<obj>.P0).')
                 return
             end
             
             % Optional communication
             verb = obj.opts.verbosity;
             if (verb > 0)
-                fprintf('Relaxing to desired barotrope...\n\n')
+                fprintf('Relaxing to barotrope...\n\n')
             end
             
             % Ready, set,...
             warning('off','TOF4:maxiter')
             warning('off','TOF7:maxiter')
+            obj.opts.MaxIterHE = 2;
             if obj.opts.toforder == 4
                 tofun = @tof4;
             else
@@ -287,6 +287,7 @@ classdef TOFPlanet < handle
                 if isempty(old_Js)
                     old_Js = [-1, zeros(1,obj.opts.toforder)];
                 end
+                old_m = obj.mrot;
                 old_ro = obj.rhoi;
                 
                 % Call the tof algorithm
@@ -303,25 +304,29 @@ classdef TOFPlanet < handle
                 obj.aos = out.a0;
                 obj.A0 = flipud(out.A0);
                 
-                % Update density from barotrope and renormalize
+                % Update density from barotrope
                 obj.update_densities();
+                % Renormalize to reference mass and radius
                 obj.renormalize();
                 
-                % Calculate changes in shape/density
-                dJs = abs((obj.Js - old_Js)./old_Js);
-                dJs = max(dJs(isfinite(dJs)));
+                % Calculate changes in shape/rotation/density
+                % dJs = abs((obj.Js - old_Js)./old_Js);
+                % dJs = max(dJs(isfinite(dJs)));
+                dJs = abs(obj.Js(2) - old_Js(2));
+                drot = abs(obj.mrot - old_m);
                 dro = obj.rhoi./old_ro;
                 dro = var(dro(isfinite(dro)));
                 
                 if (verb > 0)
                     fprintf('Baropass %d (of max %d)...done. (%g sec)\n',...
                         iter, obj.opts.MaxIterBar, toc(t_pass))
-                    fprintf('var(drho) = %g (%g required); dJ = %g (%g required).\n\n',...
+                    fprintf('var(drho) = %g (%g required); dJ2 = %g (%g required).\n\n',...
                         dro, obj.opts.drhotol, dJs, obj.opts.dJtol)
                 end
                 
-                % The stopping criterion is to satisfy both J and rho tolerance
-                if (dro < obj.opts.drhotol) && dJs < obj.opts.dJtol
+                % The stopping criterion is to satisfy J rot and rho tolerances
+                if (dro < obj.opts.drhotol) && dJs < (obj.opts.dJtol) && ...
+                    (drot < obj.opts.drottol)
                     break
                 end
                 
@@ -1566,11 +1571,11 @@ classdef TOFPlanet < handle
         end
         
         function val = get.qrot(obj)
-            val = obj.wrot^2.*obj.radius^3./obj.GM;
+            val = obj.wrot^2.*obj.radius^3./(obj.G*obj.mass);
         end
         
         function val = get.mrot(obj)
-            val = obj.wrot^2.*obj.s0^3./obj.GM;
+            val = obj.wrot^2.*obj.s0^3./(obj.G*obj.mass);
         end
         
         function set.mrot(~,~)
@@ -1659,6 +1664,15 @@ classdef TOFPlanet < handle
                 ss.s4(k)*Pn(4,mu) + ss.s6(k)*Pn(6,mu) + ...
                 ss.s8(k)*Pn(8,mu);
             r = @(teta) 1 + shp(cos(teta));
+        end
+        function tp = make_a_jup(N)
+            % Return a TOFPlanet set with Jupiter ref values
+            tp = TOFPlanet();
+            a = -15*tp.mass/8/pi/tp.radius^3;
+            zvec = linspace(1, 1/N, N);
+            dvec = a*zvec.^2 - a;
+            tp.si = zvec*tp.radius;
+            tp.rhoi = dvec;
         end
     end % End of static methods block
 end % End of classdef

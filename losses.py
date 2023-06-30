@@ -53,8 +53,11 @@ def NMoI(I, obs):
 #     return np.sqrt(((P - obs.P)/obs.dP)**2)
 
 def rho0(prof, obs):
-    """A prior on 1-bar density."""
     return np.sqrt(((prof[1][0] - obs.rho0)/(obs.drho0))**2)
+
+def rhomax(prof, obs):
+    romax = prof[1][-1]
+    return (max(romax, obs.rhomax) - obs.rhomax)/obs.rhobar
 
 ### undocumented ad-hoc losses
 def _french23(planet, obs):

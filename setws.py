@@ -12,6 +12,7 @@ sys.path.append(os.getcwd())
 
 import observables
 import ppwd
+import ppbs
 import TOFPlanet
 import ahelpers as ah
 import losses

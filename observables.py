@@ -50,6 +50,7 @@ uniform error bars, for example.
 import numpy as np
 
 G = 6.67430e-11         # http://physics.nist.gov/cuu/index.html
+M_E = 5.9722e+24
 
 class Jupiter:
     pname = 'jupiter'
@@ -380,6 +381,20 @@ class Uranus:
                 (-1,self.J2,self.J4,self.J6,self.J8,self.J10,self.J12,self.J14))
         self.dJs = np.array(
                 (0,self.dJ2,self.dJ4,self.dJ6,self.dJ8,self.dJ10,self.dJ12,self.dJ14))
+
+
+class Uranus_b1(Uranus):
+    P = 62080
+    J2 = 3510.68e-6
+    dJ2 = 4.14e-10
+    J4 =  -34.17e-6
+    dJ4 = 5.25e-11
+    J6 = 5.03473E-07
+    dJ6 = 7.54e-11
+    J8  = -9.414e-09
+    dJ8 = 1.04e-10
+    Js = np.array((-1, J2, J4, J6, J8, Uranus.J10, Uranus.J12, Uranus.J14))
+    dJs = np.array((0,dJ2,dJ4,dJ6,dJ8,Uranus.dJ10,Uranus.dJ12,Uranus.dJ14))
 
 class Uranus_ppwd(Uranus):
     J2  =  Uranus.J2

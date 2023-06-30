@@ -5,10 +5,48 @@
 import sys, os
 import numpy as np
 import TOFPlanet
+import tof4, tof7
 from scipy.stats import norm, chi2
 cout = sys.stdout.write
 
-def cook_planet(x, obs, mdl, transform, **kwargs):
+def cook_ppbs_planet(x, obs, mdl, transform, **kwargs):
+    """Create a planet object from sample-space parameters."""
+    opts = {**{'fix_rot':True,
+               'fix_mass':True,
+               'no_spin':False,
+               'with_k2':False,
+               'toforder':4,
+               'toflevels':4096,
+               'xlevels':128,
+               'savess':False},
+            **kwargs}
+
+    if opts['fix_rot']:
+        Prot = obs.P
+        x = x
+    else:
+        Prot = x[-1]*obs.dP/2 + obs.P
+        x = x[:-1]
+    y = transform(x)
+    tp = mdl(opts['toflevels'], y, obs, opts['toforder'], opts['xlevels'])
+    if opts['no_spin']:
+        tp.period = np.inf
+    tp.relax_to_barotrope(fixmass=opts['fix_mass'])
+
+    tofun = tof4.tof4 if opts['toforder'] == 4 else tof7.tof7
+    _, out = tofun(tp.si,tp.rhoi,tp.mrot,xlevels=opts['xlevels'],calc_moi=True)
+    tp.NMoI = out.NMoI
+
+    if opts['with_k2']:
+        tp.k2 = lovek2(tp.si, tp.rhoi)
+
+    if not opts['savess']:
+        tp.ss = None
+        tp.SS = None
+
+    return tp
+
+def cook_ppwd_planet(x, obs, mdl, transform, **kwargs):
     """Create a planet object from sample-space parameters."""
     opts = {**{'fix_rot':True,
                'fix_mass':True,

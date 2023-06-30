@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Script to convert a ppwd-sample to list of TOFPlanets.
+# Script to convert a PPBS-sample to list of TOFPlanets.
 #------------------------------------------------------------------------------
 import sys, os
 import pickle
@@ -14,45 +14,14 @@ import tof4, tof7
 import TOFPlanet
 import ahelpers as ah
 
-import ppwd
-the_mdl = ppwd.ppwd_profile
-the_transform = ppwd.ppwd_transform
-
-# def cook_planet(x, obs, opts):
-#     """Create a planet object from sample-space parameters."""
-#     if opts.fix_rot:
-#         Prot = obs.P
-#         x = x
-#     else:
-#         Prot = x[0]*obs.dP/2 + obs.P
-#         x = x[1:]
-#     y = the_transform(x, obs)
-#     svec, dvec = the_mdl(opts.toflevels, y, obs.rho0)
-#     tp = TOFPlanet.TOFPlanet(obs)
-#     tp.si = svec*obs.s0
-#     tp.rhoi = dvec
-#     tp.period = Prot
-#     tp.opts['toforder'] = opts.toforder
-#     tp.opts['xlevels'] = opts.xlevels
-#     if opts.no_spin:
-#         tp.period = np.inf
-#     if opts.preserve_period:
-#         tp.relax_to_rotation(opts.fix_mass)
-#     else:
-#         tp.mrot = (2*np.pi/tp.period)**2*tp.s0**3/tp.GM
-#     tp.relax_to_HE(fixmass=opts.fix_mass,moi=True,pressure=True)
-
-#     if opts.with_k2:
-#         tp.k2 = ah.lovek2(tp.si, tp.rhoi)
-#     if not opts.savess:
-#         tp.ss = None
-#         tp.SS = None
-#     return tp
+import ppbs
+the_mdl = ppbs.ppbs_planet
+the_transform = ppbs._transform
 
 def _PCL():
     # Return struct with command line arguments as fields.
     parser = argparse.ArgumentParser(
-        description="PPWD profiles from sample.",
+        description="PPBS profiles from sample.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('samplefile', help="File with model params in rows")
@@ -74,9 +43,6 @@ def _PCL():
 
     mdlgroup.add_argument('--fix-rot', type=int, default=1,
         help="Don't sample rotation period (use obs.P instead)")
-
-    mdlgroup.add_argument('--preserve-period', type=int, default=1,
-        help="Iterate on rotation m until rotation period matched obs.P.")
 
     mdlgroup.add_argument('--no-spin', action='store_true',
         help="Make spherical planet (sets obs.P to inf)")
@@ -142,7 +108,7 @@ def _main(spool,args):
         if (args.ncores == 1) and (args.verbosity > 0):
             print(f"cooking planet {k+1} of {nsamp}...",end='')
         s = sample[k]
-        p = ah.cook_planet(s,obs,the_mdl,the_transform,**args.__dict__)
+        p = ah.cook_ppbs_planet(s,obs,the_mdl,the_transform,**args.__dict__)
         planets.append(p)
         if (args.ncores == 1) and (args.verbosity > 0):
             print("done.")
@@ -150,6 +116,8 @@ def _main(spool,args):
     print(f"Cooking planets...done ({(toc-tic)/3600:0.2g} hours).")
 
     # pickle planets
+    for p in planets:
+        p.baro = None # can't pickle a <locals> function object
     outname = f"{args.samplefile[:-4]}_planets.pickle"
     with open(outname,'wb') as f:
         pickle.dump(planets,f)
