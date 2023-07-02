@@ -79,7 +79,10 @@ def _lnprob(x,obs,args):
 
     # Transform from sample space to model space and create the TOFPlanet
     y = the_transform(xx)
+    if y[-1] > y[-2]: # z23 > z12
+        return -np.inf
     tp = the_mdl(args.toflevels, y, obs, args.toforder, args.xlevels)
+    tp.period = Prot
 
     # If model not pre-rejected, relax to barotrope and evaluate
     dsqr = 0

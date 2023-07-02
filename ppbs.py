@@ -43,14 +43,14 @@ _beno_y_seed = np.array([100000,
                          0.90177,
                          0.550049])
 
-def ppbs_planet(N, x, obs, toforder=4, xlevels=-1):
+def ppbs_planet(N, y, obs, toforder=4, xlevels=-1):
     """Create a TOFPlanet from ppbs parameters."""
     p = TOFPlanet(obs)
     p.opts['toforder'] = toforder
     p.opts['xlevels'] = xlevels
 
     # The ppbs parameterization
-    K1, n1, K2, n2, K3, n3, r12, r23 = x
+    K1, n1, K2, n2, K3, n3, r12, r23 = y
 
     # Make radius grid; snap to layer boundaries
     zvec = np.linspace(1, 1/N, N)
@@ -73,7 +73,7 @@ def ppbs_planet(N, x, obs, toforder=4, xlevels=-1):
         return rho
     p.set_barotrope(tripoly)
 
-    p._params = x
+    p._params = y
     return p
 
 def ppbs_prior_uniform(x,obs):
@@ -90,8 +90,6 @@ def ppbs_prior_uniform(x,obs):
     becomes
         X ~ (b - a)*(e^x)/(1 + e^x)^2.
     """
-    if x[-1] > x[-2]:
-        return -np.inf
     lp = np.zeros_like(x)
     for k in range(len(lp)):
         a, b = _def_sup[k]
