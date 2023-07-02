@@ -73,6 +73,7 @@ def ppbs_planet(N, x, obs, toforder=4, xlevels=-1):
         return rho
     p.set_barotrope(tripoly)
 
+    p._params = x
     return p
 
 def ppbs_prior_uniform(x,obs):
@@ -89,13 +90,12 @@ def ppbs_prior_uniform(x,obs):
     becomes
         X ~ (b - a)*(e^x)/(1 + e^x)^2.
     """
-    lp = np.zeros(x.shape)
-
-    # polynomial coefficients
+    if x[-1] > x[-2]:
+        return -np.inf
+    lp = np.zeros_like(x)
     for k in range(len(lp)):
         a, b = _def_sup[k]
         lp[k] = x[k] - 2*np.log(1 + np.exp(x[k])) + np.log(b - a)
-
     return sum(lp)
 
 def _transform(x, supports=_def_sup):
@@ -121,10 +121,6 @@ def _expit(x,a,b):
 
 def _logit(x,a,b):
     return np.log(x - a) - np.log(b - x)
-
-def _sigmoid(x, z, scale, sh):
-    return scale/(1 + np.exp(sh*(x - z)))
-
 
 ####
 if __name__ == '__main__':

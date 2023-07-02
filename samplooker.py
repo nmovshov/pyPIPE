@@ -39,9 +39,14 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_ppwd(fname,rol=False,dims='all',trans=None,**kwargs):
+def hist_params(fname,rol=False,dims='all',trans=None,**kwargs):
     # Prepare the data
-    C = np.loadtxt(fname) if type(fname) is str else fname
+    planets = np.loadtxt(fname) if type(fname) is str else fname
+    try:
+        C = np.array([p._params for p in planets])
+    except AttributeError:
+        print("Planet object did not store sample parameter.")
+        return
     if trans is not None:
         C = np.array([trans(row) for row in C])
     # Inspect histograms
