@@ -76,7 +76,7 @@ def ppbs_planet(N, y, obs, toforder=4, xlevels=-1):
     p._params = y
     return p
 
-def ppbs_prior_uniform(x,obs):
+def ppbs_prior_uniform(x):
     """A uniform prior on the PPBS sampling-space parameters.
 
     We use independently uniform prior on the polytrope parameters and

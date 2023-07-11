@@ -1,18 +1,20 @@
 #------------------------------------------------------------------------------
-# Script to select winners from a ppwd-sample emcee chain.
+# Script to select winners from a ppbs-sample emcee chain.
 #------------------------------------------------------------------------------
 import sys, os
 import numpy as np
 import argparse
-import ppwd
-import ahelpers as ah
 
+# pyPIPE modules
 import observables
+import tof4, tof7
 import TOFPlanet
 import ahelpers as ah
-import ppwd
-the_mdl = ppwd.ppwd_profile
-the_transform = ppwd.ppwd_transform
+
+import ppbs
+the_mdl = ppbs.ppbs_planet
+the_transform = ppbs._transform
+the_prior = ppbs.ppbs_prior_uniform
 
 def _main(args):
     # Load the raw emcee chain
@@ -20,8 +22,8 @@ def _main(args):
     print()
     print("C.shape = ", C.shape)
 
-    # Candidates have loglike value (minus prior) equiv to 2.5 sigma with n dof
-    keepers = ah.ppwd_winners(C,L,args.dof,ppwd.ppwd_prior,args.fix_rot)
+    # Candidates have loglike value minus prior equiv to 2.5 sigma with n dof
+    keepers = ah.ppbs_winners(C,L,args.dof,the_prior,args.fix_rot)
     print("keepers.shape = ", keepers.shape)
     Z = C[keepers,-1,:]
     if Z.ndim == 1:
@@ -52,7 +54,7 @@ def _main(args):
         colabs = []
         ind = [o//2 for o in range(2,args.J_strict+1,2)]
         for z in Z:
-            p = ah.cook_planet(z,obs,the_mdl,the_transform,**args.__dict__)
+            p = ah.cook_ppbs_planet(z,obs,the_mdl,the_transform,**args.__dict__)
             E = np.abs(p.Js[ind] - obs.Js[ind])/obs.dJs[ind]
             if np.any(E > args.J_thresh):
                 colabs.append(True)
@@ -119,7 +121,7 @@ def _PCL():
     tofgroup.add_argument('--toflevels', type=int, default=4096,
         help="Number of level surfaces used to discretize density profile")
 
-    tofgroup.add_argument('--xlevels', type=int, default=256,
+    tofgroup.add_argument('--xlevels', type=int, default=128,
         help="Skip-n-spline levels")
 
     args = parser.parse_args()
