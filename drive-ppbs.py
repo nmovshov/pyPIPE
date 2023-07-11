@@ -70,7 +70,7 @@ def _lnprob(x,obs,args):
         xx = x[:-1]
 
     # Evaluate prior on sample-space parameters
-    P = (the_prior(xx, obs) + generic_priors.rotation_prior(Prot, obs))
+    P = (the_prior(xx) + generic_priors.rotation_prior(Prot, obs))
     if P == -np.inf:
         return P
     if np.isnan(P):
