@@ -39,7 +39,7 @@ methods(Static)
                  repmat(eos3, N - cind + 1, 1)];
 
         % Initialize with quadratic density profile
-        a = quadratic_planet(obs.M, obs.a0);
+        a = ppbs.quadratic_planet(obs.M, obs.a0);
         p.si = zvec*obs.a0;
         p.rhoi = a*zvec.^2 - a;
     end
