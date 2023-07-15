@@ -59,7 +59,7 @@ def ppbs_planet(N, y, obs, toforder=4, xlevels=-1):
     zvec[tind] = r12
     zvec[cind] = r23
 
-    # Set a quadratic density profile as initia guess
+    # Initialize with quadratic density profile
     a = _quadratic_planet(obs.M, obs.a0)
     p.si = zvec*obs.a0
     p.rhoi = a*zvec**2 - a

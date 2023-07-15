@@ -6,11 +6,11 @@ function planets = ppbs_planets_from_sample(samplefile,observables,varargin)
 %
 %KNOWN PARAMETER KEYS (case ignored and unique partial match allowed)
 %
-%nsamples - Number of planets to create, 0 for full sample [ positive integer {inf} ]
+%nsamples - Number of planets to create, inf for full sample [ positive integer {inf} ]
 %fixrot - If true use observables.P else use first element of sample-space vector [ {true} | false ]
 %toforder - Theory of figures expansion order [ {4} 7 ]
 %toflevels - Number of level surfaces used to discretize density [ positive integer {4096} ]
-%xlevels - Skip-and-spline levels [ integer (-1 to disable) {256} ]
+%xlevels - Skip-and-spline levels [ integer (-1 to disable) {128} ]
 %savess - Retain full shape information (triples file size) [ true | {false} ]
 %rdclvl - Reduction level [ 0=none, {1=to struct}, 2=to single, 3=to scalars ]
 %savemat If true save to mat file [ true | {false} ]
@@ -64,7 +64,8 @@ else
     Prot = x(end)*obs.dP/2 + obs.P;
     x = x(1:end-1);
 end
-tp = ppbs.ppbs_planet(args.toflevels,x,obs,args.toforder,args.xlevels);
+y = ppbs.transform(x);
+tp = ppbs.ppbs_planet(args.toflevels,y,obs,args.toforder,args.xlevels);
 tp.relax_to_barotrope();
 end
 
