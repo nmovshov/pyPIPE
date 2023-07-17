@@ -143,6 +143,9 @@ def _read_seeds(args, outdir, obs):
         print("Failed to load seed(s); check command line.")
         raise
 
+    if args.singleseed:
+        p0 = p0[np.random.randint(p0.shape[0]),:]
+        p0 = np.reshape(p0, (1,-1))
     np.savetxt(os.path.join(outdir,'seed.txt'), p0)
     return p0
 
@@ -290,6 +293,9 @@ def _PCL():
 
     parser.add_argument('-v', '--verbosity', type=int, default=1,
         help="Control runtime message verbosity")
+
+    parser.add_argument('--singleseed', action='store_true',
+        help="Seed all walkers from single (random) line in seed file")
 
     parser.add_argument('-r', '--restart', action='store_true',
         help="Restart using emcee.Backend")
