@@ -21,9 +21,9 @@ def _get_canvas(newfig):
     else:
         plt.figure(plt.gcf().number)
 
-def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
+def hist_mass(planets, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     M = np.array([p.M for p in planets])/1e24
 
     # Prepare the canvas
@@ -38,9 +38,9 @@ def hist_mass(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_params(fname,rol=False,dims='all',trans=None,**kwargs):
+def hist_params(planets,rol=False,dims='all',trans=None,**kwargs):
     # Prepare the data
-    planets = np.loadtxt(fname) if type(fname) is str else fname
+    planets = np.loadtxt(planets) if type(planets) is str else planets
     try:
         C = np.array([p._params for p in planets])
     except AttributeError:
@@ -65,9 +65,9 @@ def hist_params(fname,rol=False,dims='all',trans=None,**kwargs):
         plt.show(block=False)
         pass
 
-def hist_moi(fname,rol=False,newfig=False,density=True,show=True,**kwargs):
+def hist_moi(planets,rol=False,newfig=False,density=True,show=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     ice = np.array([p.NMoI for p in planets])
     mu, sig = ice.mean(), ice.std()
     if rol:
@@ -87,9 +87,9 @@ def hist_moi(fname,rol=False,newfig=False,density=True,show=True,**kwargs):
     if show:
         plt.show(block=False)
 
-def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
+def hist_rho_c(planets, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     rcs = np.array([p.rhoi[-1] for p in planets])
 
     # Prepare the canvas
@@ -103,9 +103,9 @@ def hist_rho_c(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_rho0(fname, newfig=False, bins='auto', density=True, **kwargs):
+def hist_rho0(planets, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     r0s = np.array([p.rhoi[0] for p in planets])
 
     # Prepare the canvas
@@ -119,9 +119,9 @@ def hist_rho0(fname, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
+def ensemble_of_profs(planets, newfig=False, nlines=20, alfa=0.4, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     profs = np.array([p.rhoi for p in planets]).T
     rcs = profs[-1,:]
     ind = np.argsort(rcs)
@@ -144,9 +144,9 @@ def ensemble_of_profs(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def ensemble_of_barotropes(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
+def ensemble_of_barotropes(planets, newfig=False, nlines=20, alfa=0.4, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     pees = 1e-11*np.array([p.Pi for p in planets]).T
     rhos = 1e-3*np.array([p.rhoi for p in planets]).T
 
@@ -174,9 +174,9 @@ def ensemble_of_barotropes(fname, newfig=False, nlines=20, alfa=0.4, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def density_envelope(fname, newfig=False, prctile=2, show=True, **kwargs):
+def density_envelope(planets, newfig=False, prctile=2, show=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     profs = np.array([p.rhoi for p in planets]).T
     prcs_lo = prctile
     prcs_hi = 100 - prcs_lo
@@ -197,10 +197,10 @@ def density_envelope(fname, newfig=False, prctile=2, show=True, **kwargs):
     if show:
         plt.show(block=False)
 
-def barotrope_envelope(fname, newfig=False, prctile=2, show=True, **kwargs):
+def barotrope_envelope(planets, newfig=False, prctile=2, show=True, **kwargs):
     from scipy.interpolate import interp1d
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     pees = 1e-11*np.array([p.Pi for p in planets]).T
     rhos = 1e-3*np.array([p.rhoi for p in planets]).T
     x = np.logspace(-6, np.ceil(np.log10(pees.max())), 1024)
@@ -249,9 +249,9 @@ def plot_profile(s, rho, newfig=False, **kwargs):
     plt.ylabel(r'$\rho$ [1000 kg/m$^3$]')
     plt.show(block=False)
 
-def hist_loss(fname,obs,Jmax,newfig=False,bins='auto',density=True,**kwargs):
+def hist_loss(planets,obs,Jmax,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     L = ah.lossify_planets(planets,obs,Jmax)
 
     # Prepare the canvas
@@ -265,9 +265,9 @@ def hist_loss(fname,obs,Jmax,newfig=False,bins='auto',density=True,**kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_mass_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
+def hist_mass_err(planets,obs,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname)
+    planets = load_planets(planets) if type(planets) is str else planets
     M_err = (np.array([p.M for p in planets]) - obs.M)/obs.dM
 
     # Prepare the canvas
@@ -282,9 +282,9 @@ def hist_mass_err(fname,obs,newfig=False,bins='auto',density=True,**kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J(fname, n, newfig=False, bins='auto', density=True, **kwargs):
+def hist_J(planets, n, newfig=False, bins='auto', density=True, **kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     J = 1e6*np.array([p.Js[n//2] for p in planets])
 
     # Prepare the canvas
@@ -298,9 +298,9 @@ def hist_J(fname, n, newfig=False, bins='auto', density=True, **kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_J_err(fname,n,obs,newfig=False,bins='auto',density=True,**kwargs):
+def hist_J_err(planets,n,obs,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     J = np.array([p.Js[n//2] for p in planets])
     J_err = 1e6*(J - obs.Js[n//2])
 
@@ -316,9 +316,9 @@ def hist_J_err(fname,n,obs,newfig=False,bins='auto',density=True,**kwargs):
     plt.yticks([])
     plt.show(block=False)
 
-def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs):
+def hist_rotation(planets,obs=None,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     s0 = np.array([p.s0 for p in planets])
     mrot = np.array([p.mrot for p in planets])
     GM = np.array([p.GM for p in planets])
@@ -343,10 +343,10 @@ def hist_rotation(fname,obs=None,newfig=False,bins='auto',density=True,**kwargs)
     plt.yticks([])
     plt.show(block=False)
 
-def hist_attr(fname, attr,
+def hist_attr(planets, attr,
     obs=None,newfig=False,bins='auto',density=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     vals = np.array([getattr(p,attr,np.nan) for p in planets])
     if obs is None:
         v_mu = vals.mean()
@@ -368,9 +368,9 @@ def hist_attr(fname, attr,
     plt.yticks([])
     plt.show(block=False)
 
-def k2_v_I(fname,newfig=False,rol=False,show=True,**kwargs):
+def k2_v_I(planets,newfig=False,rol=False,show=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     I = np.array([p.NMoI for p in planets])
     K = np.array([p.k2 for p in planets])
 
@@ -386,9 +386,9 @@ def k2_v_I(fname,newfig=False,rol=False,show=True,**kwargs):
     if show:
         plt.show(block=False)
 
-def I_v_k2(fname,newfig=False,rol=False,show=True,**kwargs):
+def I_v_k2(planets,newfig=False,rol=False,show=True,**kwargs):
     # Prepare the data
-    planets = load_planets(fname) if type(fname) is str else fname
+    planets = load_planets(planets) if type(planets) is str else planets
     I = np.array([p.NMoI for p in planets])
     K = np.array([p.k2 for p in planets])
 
